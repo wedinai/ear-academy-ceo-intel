@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ear Academy — CEO Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<!-- JSZip for .docx extraction -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<!-- pdf.js for .pdf extraction -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root {
+  --bg: #0e0e0f;
+  --bg2: #161618;
+  --bg3: #1e1e21;
+  --bg4: #27272b;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0efe8;
+  --text2: #9a9891;
+  --text3: #5a5955;
+  --accent: #e8b84b;
+  --green: #4caf7d;
+  --red: #e05a4b;
+  --blue: #5a9fd4;
+  --purple: #9b7fe8;
+  --orange: #e07a3a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Layout ────────────────────────────────────── */
+#app {
+  display: grid;
+  grid-template-rows: 56px 1fr;
+  grid-template-columns: 220px 1fr;
+  grid-template-areas:
+    "topbar topbar"
+    "sidebar main";
+  height: 100vh;
+  overflow: hidden;
+}
+
+#topbar {
+  grid-area: topbar;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  position: relative;
+  z-index: 10;
+}
+
+#topbar .logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--accent);
+  letter-spacing: -0.3px;
+}
+
+#topbar .tagline {
+  color: var(--text3);
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+}
+
+#topbar .spacer { flex: 1; }
+
+#topbar .today {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+}
+
+#hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--text2);
+}
+
+#sidebar {
+  grid-area: sidebar;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 0;
+  transition: background 0.15s, color 0.15s;
+  user-select: none;
+}
+
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active { background: var(--bg3); color: var(--accent); }
+.nav-item .nav-icon { width: 16px; text-align: center; font-size: 14px; flex-shrink: 0; }
+.nav-section-label {
+  padding: 16px 16px 6px;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+#main {
+  grid-area: main;
+  overflow-y: auto;
+  padding: 28px 32px;
+}
+
+/* ── Cards ─────────────────────────────────────── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.card-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 15px;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+
+.stat-card .stat-label {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+
+.stat-card .stat-value {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.stat-card .stat-sub {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 4px;
+}
+
+/* ── Badges ─────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+}
+
+.badge-urgent { background: rgba(224,90,75,0.18); color: var(--red); }
+.badge-high { background: rgba(232,184,75,0.18); color: var(--accent); }
+.badge-medium { background: rgba(90,159,212,0.18); color: var(--blue); }
+.badge-done { background: rgba(76,175,125,0.18); color: var(--green); }
+.badge-sales { background: rgba(155,127,232,0.18); color: var(--purple); }
+.badge-product { background: rgba(90,159,212,0.18); color: var(--blue); }
+.badge-ops { background: rgba(224,122,58,0.18); color: var(--orange); }
+.badge-general { background: rgba(90,89,85,0.18); color: var(--text2); }
+.badge-customer { background: rgba(76,175,125,0.18); color: var(--green); }
+.badge-investor { background: rgba(155,127,232,0.18); color: var(--purple); }
+.badge-partner { background: rgba(90,159,212,0.18); color: var(--blue); }
+.badge-advisory { background: rgba(232,184,75,0.18); color: var(--accent); }
+
+/* ── Section header ─────────────────────────────── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--text);
+}
+
+.section-sub {
+  font-size: 12px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  margin-top: 2px;
+}
+
+/* ── Task items ─────────────────────────────────── */
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.task-item:last-child { border-bottom: none; }
+
+.task-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--border2);
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.task-checkbox.checked {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.task-checkbox.checked::after { content: '✓'; color: #fff; font-size: 11px; }
+
+.task-body { flex: 1; min-width: 0; }
+
+.task-title {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.task-title.done {
+  color: var(--text3);
+  text-decoration: line-through;
+}
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.task-source {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── Filter tabs ────────────────────────────────── */
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  transition: all 0.15s;
+}
+
+.filter-tab:hover { background: var(--bg3); color: var(--text); }
+.filter-tab.active { background: var(--bg3); color: var(--accent); border-color: rgba(232,184,75,0.3); }
+
+/* ── Meeting cards ──────────────────────────────── */
+.meeting-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 14px;
+}
+
+.meeting-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.meeting-party {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.meeting-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 3px;
+}
+
+.meeting-context {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.meeting-section-title {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+  margin-top: 12px;
+}
+
+.meeting-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meeting-list li {
+  font-size: 13px;
+  color: var(--text2);
+  padding-left: 14px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.meeting-list li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--text3);
+}
+
+.meeting-list.red li::before { color: var(--red); content: '!'; }
+.meeting-list.green li::before { color: var(--green); content: '↗'; }
+
+.meeting-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Buttons ────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text);
+  transition: all 0.15s;
+  font-family: inherit;
+  text-decoration: none;
+}
+
+.btn:hover { background: var(--bg4); border-color: var(--border2); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #0e0e0f; font-weight: 600; }
+.btn-primary:hover { background: #f0c55a; border-color: #f0c55a; }
+.btn-danger { color: var(--red); border-color: rgba(224,90,75,0.2); background: rgba(224,90,75,0.08); }
+.btn-danger:hover { background: rgba(224,90,75,0.18); }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+.btn-icon { padding: 6px; width: 30px; height: 30px; justify-content: center; }
+
+/* ── Progress bars ──────────────────────────────── */
+.progress-bar-wrap {
+  height: 6px;
+  background: var(--bg4);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.progress-green { background: var(--green); }
+.progress-amber { background: var(--accent); }
+.progress-red { background: var(--red); }
+
+/* ── Objective items ────────────────────────────── */
+.objective-item {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.objective-item:last-child { border-bottom: none; }
+
+.objective-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  gap: 12px;
+}
+
+.objective-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.objective-pct {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.objective-evidence {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* ── Forms ──────────────────────────────────────── */
+.form-group { margin-bottom: 14px; }
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 7px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+}
+
+.form-select option { background: var(--bg3); }
+.form-textarea { resize: vertical; min-height: 80px; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.range-input {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ── Drag and Drop Zone ──────────────────────────── */
+#drop-zone {
+  border: 2px dashed var(--border2);
+  border-radius: 14px;
+  padding: 56px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg3);
+  position: relative;
+}
+
+#drop-zone:hover, #drop-zone.drag-over {
+  border-color: var(--accent);
+  background: rgba(232,184,75,0.04);
+}
+
+#drop-zone.drag-over { transform: scale(1.005); }
+#drop-zone.processing { border-color: var(--blue); background: rgba(90,159,212,0.05); cursor: default; }
+#drop-zone.success { border-color: var(--green); background: rgba(76,175,125,0.05); }
+#drop-zone.error { border-color: var(--red); background: rgba(224,90,75,0.05); }
+
+.drop-zone-icon {
+  font-size: 40px;
+  margin-bottom: 14px;
+  line-height: 1;
+}
+
+.drop-zone-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.drop-zone-sub {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+
+.drop-zone-formats {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text3);
+}
+
+#drop-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Processing status ───────────────────────────── */
+#process-status {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+
+#process-status.show { display: flex; }
+#process-status.info { background: rgba(90,159,212,0.1); color: var(--blue); border: 1px solid rgba(90,159,212,0.2); }
+#process-status.success { background: rgba(76,175,125,0.1); color: var(--green); border: 1px solid rgba(76,175,125,0.2); }
+#process-status.error { background: rgba(224,90,75,0.1); color: var(--red); border: 1px solid rgba(224,90,75,0.2); }
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(90,159,212,0.3);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Ingestion history ───────────────────────────── */
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.history-item:last-child { border-bottom: none; }
+.history-filename { color: var(--text); font-weight: 500; }
+.history-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* ── Signal / Risk / Opp items ──────────────────── */
+.intel-item {
+  padding: 10px 14px;
+  background: var(--bg3);
+  border-radius: 7px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--border2);
+}
+
+.intel-item.signal { border-left-color: var(--blue); }
+.intel-item.opportunity { border-left-color: var(--green); }
+.intel-item.risk { border-left-color: var(--red); }
+
+/* ── Timeline ───────────────────────────────────── */
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 20px;
+  position: relative;
+}
+
+.timeline-item::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 38px;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+.timeline-item:last-child::after { display: none; }
+
+.timeline-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg3);
+  border: 2px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.timeline-body { flex: 1; }
+.timeline-party { font-weight: 500; font-size: 14px; color: var(--text); }
+.timeline-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); margin-top: 2px; }
+.timeline-preview { font-size: 12px; color: var(--text2); margin-top: 6px; line-height: 1.5; }
+
+/* ── Section grid helpers ───────────────────────── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* ── Divider ────────────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* ── Empty state ────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text3);
+  font-size: 13px;
+}
+
+.empty-state .empty-icon { font-size: 28px; margin-bottom: 10px; }
+
+/* ── Responsive ─────────────────────────────────── */
+@media (max-width: 768px) {
+  #app {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "topbar"
+      "main";
+  }
+  #sidebar {
+    position: fixed;
+    top: 56px;
+    left: -220px;
+    width: 220px;
+    height: calc(100vh - 56px);
+    z-index: 100;
+    transition: left 0.25s;
+  }
+  #sidebar.open { left: 0; }
+  #hamburger { display: flex; }
+  #main { padding: 20px 16px; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .three-col { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+}
+
+/* ── Utils ──────────────────────────────────────── */
+.hidden { display: none !important; }
+.mono { font-family: 'DM Mono', monospace; }
+.text2 { color: var(--text2); }
+.text3 { color: var(--text3); }
+.accent { color: var(--accent); }
+.green { color: var(--green); }
+.red { color: var(--red); }
+.flex-center { display: flex; align-items: center; gap: 8px; }
+.gap-8 { gap: 8px; }
+.mt-4 { margin-top: 4px; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+
+/* ── Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+/* ── Add form collapsed ─────────────────────────── */
+.add-form {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.add-form-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Topbar ── -->
+  <header id="topbar">
+    <button id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="logo">Ear Academy</div>
+    <div class="tagline">CEO Intelligence</div>
+    <div class="spacer"></div>
+    <div class="today mono" id="today-date"></div>
+  </header>
+
+  <!-- ── Sidebar ── -->
+  <nav id="sidebar">
+    <div class="nav-section-label">Overview</div>
+    <div class="nav-item active" onclick="navigate('dashboard')" data-section="dashboard">
+      <span class="nav-icon">⌂</span> Dashboard
+    </div>
+    <div class="nav-section-label">Work</div>
+    <div class="nav-item" onclick="navigate('actions')" data-section="actions">
+      <span class="nav-icon">✓</span> Action Items
+    </div>
+    <div class="nav-item" onclick="navigate('meetings')" data-section="meetings">
+      <span class="nav-icon">◎</span> Meeting Intel
+    </div>
+    <div class="nav-section-label">Strategy</div>
+    <div class="nav-item" onclick="navigate('intel')" data-section="intel">
+      <span class="nav-icon">◈</span> Business Intel
+    </div>
+    <div class="nav-item" onclick="navigate('objectives')" data-section="objectives">
+      <span class="nav-icon">◎</span> Q1 Objectives
+    </div>
+    <div class="nav-section-label">Input</div>
+    <div class="nav-item" onclick="navigate('ingest')" data-section="ingest">
+      <span class="nav-icon">↑</span> Ingestion Console
+    </div>
+  </nav>
+
+  <!-- ── Main content ── -->
+  <main id="main">
+
+    <!-- ════ DASHBOARD ════ -->
+    <section id="section-dashboard">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Good morning, Rus</div>
+          <div class="section-sub mono" id="dash-subtitle">Loading intelligence...</div>
+        </div>
+        <button class="btn btn-sm" onclick="navigate('ingest')">+ Process Meeting</button>
+      </div>
+
+      <div class="stat-grid" id="stat-grid"></div>
+
+      <div class="two-col">
+        <div>
+          <div class="card mb-16" id="dash-urgent">
+            <div class="card-title">🚨 Urgent — Next 48 Hours</div>
+            <div id="urgent-list"></div>
+          </div>
+          <div class="card" id="dash-high">
+            <div class="card-title">⚡ High Priority — This Week</div>
+            <div id="high-list"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card mb-16">
+            <div class="card-title">Recent Meetings</div>
+            <div id="recent-meetings"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Q1 Objectives</div>
+            <div id="dash-objectives"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ ACTION ITEMS ════ -->
+    <section id="section-actions" class="hidden">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Action Items</div>
+          <div class="section-sub mono" id="actions-subtitle"></div>
+        </div>
+      </div>
+
+      <div class="add-form">
+        <div class="add-form-title">+ Add Task Manually</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Task Title</label>
+            <input type="text" class="form-input" id="new-task-title" placeholder="Describe the task..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select class="form-select" id="new-task-priority">
+              <option value="urgent">Urgent</option>
+              <option value="high" selected>High</option>
+              <option value="medium">Medium</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="new-task-category">
+              <option value="sales">Sales</option>
+              <option value="product">Product</option>
+              <option value="ops">Ops</option>
+              <option value="general" selected>General</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes (optional)</label>
+            <input type="text" class="form-input" id="new-task-notes" placeholder="Why does this matter?" />
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addTaskManually()">Add Task</button>
+      </div>
+
+      <div class="filter-tabs" id="task-filter-tabs">
+        <button class="filter-tab active" onclick="setTaskFilter('all')" data-filter="all">All</button>
+        <button class="filter-tab" onclick="setTaskFilter('urgent')" data-filter="urgent">Urgent</button>
+        <button class="filter-tab" onclick="setTaskFilter('high')" data-filter="high">High</button>
+        <button class="filter-tab" onclick="setTaskFilter('medium')" data-filter="medium">Medium</button>
+        <button class="filter-tab" onclick="setTaskFilter('completed')" data-filter="completed">Completed</button>
+        <button class="filter-tab" onclick="setTaskFilter('sales')" data-filter="sales">Sales</button>
+        <button class="filter-tab" onclick="setTaskFilter('product')" data-filter="product">Product</button>
+      </div>
+
+      <div id="tasks-list"></div>
+    </section>
+
+    <!-- ════ MEETING INTELLIGENCE ════ -->
+    <section id="section-meetings" class="hidden">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Meeting Intelligence</div>
+          <div class="section-sub mono" id="meetings-subtitle"></div>
+        </div>
+        <button class="btn btn-sm" onclick="navigate('ingest')">+ Process Meeting</button>
+      </div>
+      <div id="meetings-list"></div>
+    </section>
+
+    <!-- ════ BUSINESS INTEL ════ -->
+    <section id="section-intel" class="hidden">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Business Intelligence</div>
+          <div class="section-sub mono">Cross-meeting patterns, signals & risks</div>
+        </div>
+      </div>
+
+      <div class="two-col mb-20">
+        <div class="card">
+          <div class="card-title">📡 Market Signals</div>
+          <div id="intel-signals"></div>
+          <div class="mt-12 flex-center">
+            <input type="text" class="form-input" id="new-signal-input" placeholder="Add a market signal..." style="flex:1" />
+            <button class="btn btn-sm" onclick="addSignal()">Add</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">🎯 Open Opportunities</div>
+          <div id="intel-opps"></div>
+          <div class="mt-12 flex-center">
+            <input type="text" class="form-input" id="new-opp-input" placeholder="Add an opportunity..." style="flex:1" />
+            <button class="btn btn-sm" onclick="addOpportunity()">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-20">
+        <div class="card-title">⚠️ Risk Register</div>
+        <div id="intel-risks"></div>
+        <div class="mt-12 flex-center">
+          <input type="text" class="form-input" id="new-risk-input" placeholder="Add a risk or concern..." style="flex:1" />
+          <button class="btn btn-sm" onclick="addRisk()">Add</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📅 Activity Timeline</div>
+        <div id="intel-timeline"></div>
+      </div>
+    </section>
+
+    <!-- ════ Q1 OBJECTIVES ════ -->
+    <section id="section-objectives" class="hidden">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Q1 Objectives</div>
+          <div class="section-sub mono" id="obj-subtitle"></div>
+        </div>
+      </div>
+
+      <div class="add-form mb-20">
+        <div class="add-form-title">+ Add Objective</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Objective Name</label>
+            <input type="text" class="form-input" id="new-obj-name" placeholder="e.g. Close 10 SA school subscriptions" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Progress %</label>
+            <input type="range" class="range-input" id="new-obj-pct" min="0" max="100" value="0" oninput="document.getElementById('new-obj-pct-val').textContent=this.value+'%'" />
+            <span class="mono text3" id="new-obj-pct-val">0%</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description / Evidence</label>
+          <input type="text" class="form-input" id="new-obj-desc" placeholder="Context or current evidence..." />
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addObjective()">Add Objective</button>
+      </div>
+
+      <div class="card">
+        <div id="objectives-list"></div>
+      </div>
+    </section>
+
+    <!-- ════ INGESTION CONSOLE ════ -->
+    <section id="section-ingest" class="hidden">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Ingestion Console</div>
+          <div class="section-sub mono">Drop meeting notes — AI extracts intelligence automatically</div>
+        </div>
+        <button class="btn btn-sm btn-danger" onclick="clearAllData()">Clear All Data</button>
+      </div>
+
+      <div id="drop-zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+        <input type="file" accept=".txt,.md,.docx,.pdf" onchange="handleFileInput(event)" id="file-input" />
+        <div class="drop-zone-icon" id="dz-icon">📄</div>
+        <div class="drop-zone-title" id="dz-title">Drop your meeting notes here</div>
+        <div class="drop-zone-sub" id="dz-sub">or click to browse</div>
+        <div class="drop-zone-formats">.txt · .md · .docx · .pdf</div>
+      </div>
+
+      <div id="process-status"></div>
+
+      <div class="card mt-24">
+        <div class="card-title">Ingestion History</div>
+        <div id="ingest-history"></div>
+      </div>
+
+      <div class="card mt-16" style="background: rgba(90,159,212,0.05); border-color: rgba(90,159,212,0.15);">
+        <div class="card-title" style="color:var(--blue)">⚙️ Backend Configuration</div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:12px">
+          The ingestion pipeline requires a proxy server to call the Anthropic API.
+          Update <code class="mono" style="background:var(--bg4);padding:2px 6px;border-radius:4px">PROXY_URL</code> at
+          the top of <code class="mono" style="background:var(--bg4);padding:2px 6px;border-radius:4px">index.html</code> with your Railway deployment URL.
+        </p>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="mono" style="font-size:12px;color:var(--text3)">Current PROXY_URL:</span>
+          <code class="mono" style="font-size:12px;color:var(--accent);background:var(--bg4);padding:3px 8px;border-radius:4px" id="proxy-url-display"></code>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  CONFIGURATION — Update PROXY_URL after deploying backend to Railway
+// ═══════════════════════════════════════════════════════════════════
+const PROXY_URL = 'YOUR_RAILWAY_URL_HERE';
+// Examples:
+//   Local dev:  'http://localhost:3001'
+//   Railway:    'https://your-app-name.up.railway.app'
+// ═══════════════════════════════════════════════════════════════════
+
+// pdf.js worker
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+// ── Storage ───────────────────────────────────────────────────────
+const STORAGE_KEY = 'ear_academy_ceo_v2';
+
+function loadState() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
+  } catch { return null; }
+}
+
+function saveState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getState() { return window._state; }
+
+function setState(newState) {
+  window._state = newState;
+  saveState(newState);
+  renderCurrentSection();
+}
+
+function updateState(fn) {
+  const s = getState();
+  fn(s);
+  setState(s);
+}
+
+// ── Seed Data ────────────────────────────────────────────────────
+const SEED = {
+  meetings: [
+    {
+      id: 'm1',
+      party: 'Lisa Jane Mitchell — ESASA Music Teacher',
+      type: 'Advisory',
+      date: '2026-01-30',
+      context: 'Advisory session with a practising ESASA music teacher to validate product-market fit for SA schools.',
+      insights: [
+        '"File Control" is a universal admin requirement across ESASA schools — year plans, term plans, lesson plans required for HOD inspection',
+        'Teachers see each class once per week, 35-40 min — time poverty is the #1 pain point',
+        'Platform "too much content" perception risk — SA market needs flexibility positioning',
+        'Assessment materials are a critical product gap',
+        'Teachers are "musicians who became teachers" — admin burden misaligned with their identity',
+      ],
+      redFlags: [
+        'Assessment materials not yet fully built — potential deal-breaker',
+        'Platform built for UK market — SA adaptation ongoing',
+        'Lisa received special pricing — expectations management risk',
+      ],
+      opportunities: [
+        '19 music teachers at Feb 5 cluster meeting = 19 warm leads',
+        'Simplified SA-specific version co-creation with Lisa',
+        'High school instrumental programme (Lisa hasn\'t reviewed yet)',
+        'CAPS alignment could unlock public school market',
+      ],
+      tasks: [],
+      rawNotes: 'Seeded meeting — Lisa Jane Mitchell advisory session',
+    },
+    {
+      id: 'm2',
+      party: 'Email Strategy Review (Internal)',
+      type: 'Advisory',
+      date: '2026-02-02',
+      context: 'Internal review of outbound email messaging strategy based on Lisa Mitchell feedback.',
+      insights: [
+        'Conversational, personality-driven emails outperform clinical pain-point messaging',
+        'Personal intro, enthusiasm, medium-friction CTAs (asking for calls) convert better',
+        'Hybrid approach: preserve personality while layering in file control + flexibility messaging',
+        'Lisa\'s feedback is one data point — test whether content volume is benefit or barrier',
+      ],
+      redFlags: [],
+      opportunities: [
+        'Three email variants ready to A/B test',
+        'Validated formula: [Admin burden lifted] + [Abundant resources] + [Total flexibility] = Teacher happiness',
+      ],
+      tasks: [],
+      rawNotes: 'Seeded meeting — internal email strategy review',
+    },
+  ],
+  tasks: [
+    { id: 't1', title: 'Send updated long-term plan to Lisa with SA grade nomenclature', priority: 'urgent', done: true, category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Critical for Feb 5 cluster meeting prep' },
+    { id: 't2', title: 'Prepare business cards for cluster meeting', priority: 'urgent', done: true, category: 'ops', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: '19 music teachers attending' },
+    { id: 't3', title: 'Finalise Feb 5 presentation (19 teachers)', priority: 'urgent', done: true, category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Key conversion event' },
+    { id: 't4', title: 'Review Grade R content alignment with SA curriculum', priority: 'high', done: false, category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'CAPS alignment required for public schools' },
+    { id: 't5', title: 'Create assessment materials roadmap', priority: 'high', done: false, category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Confirmed deal-breaker gap — needs timeline' },
+    { id: 't6', title: 'Develop pricing framework for personalised school quotes', priority: 'high', done: false, category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Special pricing sets awkward precedent' },
+    { id: 't7', title: 'Schedule instrumental programme demo with Lisa', priority: 'medium', done: false, category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Lisa hasn\'t seen high school content yet' },
+    { id: 't8', title: 'Begin SA product simplification project', priority: 'medium', done: false, category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: '"Too much content" perception risk' },
+    { id: 't9', title: 'Research CAPS curriculum requirements', priority: 'medium', done: false, category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Required to unlock public school market' },
+    { id: 't10', title: 'Update outbound email templates with hybrid approach', priority: 'high', done: true, category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'Personality + file control messaging' },
+    { id: 't11', title: 'A/B test email versions across school segments', priority: 'medium', done: false, category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'Three variants ready' },
+    { id: 't12', title: 'Track outbound metrics: open rate target 35-45%, reply rate 8-12%', priority: 'medium', done: false, category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'Baseline measurement needed' },
+    { id: 't13', title: 'Build follow-up sequence after intro email', priority: 'medium', done: false, category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'No nurture sequence exists yet' },
+  ],
+  objectives: [
+    { id: 'o1', name: 'Close 10 SA school subscriptions in Q1', desc: 'Cluster meeting Feb 5 is first conversion opportunity', pct: 5 },
+    { id: 'o2', name: 'Validate email outreach messaging', desc: 'Hybrid templates created, A/B testing underway', pct: 40 },
+    { id: 'o3', name: 'Ship assessment materials v1', desc: 'Gap confirmed Jan 30, roadmap needed', pct: 10 },
+    { id: 'o4', name: 'Present to 19 teachers at cluster meeting', desc: 'Delivered Feb 5', pct: 100 },
+  ],
+  signals: [
+    'SA music teachers value flexibility over rigid curriculum',
+    'Administrative burden ("file control") is universal validated pain point across ESASA schools',
+    'No standalone music curriculum exists for SA — teachers create everything from scratch',
+    'Personality-driven email outreach converts better than clinical messaging',
+    'Cluster meetings = high-density lead generation opportunity',
+  ],
+  opportunities: [
+    'Feb 5 cluster meeting produced 19 warm teacher leads',
+    'CAPS alignment could unlock public school market at scale',
+    'Assessment materials gap = differentiation opportunity if shipped first',
+  ],
+  risks: [
+    'Assessment materials not built — risk of losing early adopters',
+    'Platform perceived as "UK-first" by SA teachers',
+    'Special pricing for Lisa sets awkward precedent',
+  ],
+};
+
+// ── Initialise ───────────────────────────────────────────────────
+function init() {
+  const stored = loadState();
+  window._state = stored || JSON.parse(JSON.stringify(SEED));
+  window._taskFilter = 'all';
+  window._currentSection = 'dashboard';
+
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-ZA', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+  document.getElementById('proxy-url-display').textContent = PROXY_URL;
+
+  if (!stored) saveState(window._state);
+
+  renderCurrentSection();
+}
+
+// ── Navigation ────────────────────────────────────────────────────
+function navigate(section) {
+  window._currentSection = section;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.section === section);
+  });
+  document.querySelectorAll('section[id^="section-"]').forEach(el => {
+    el.classList.toggle('hidden', el.id !== 'section-' + section);
+  });
+  closeSidebar();
+  renderCurrentSection();
+}
+
+function renderCurrentSection() {
+  const s = window._currentSection;
+  if (s === 'dashboard') renderDashboard();
+  else if (s === 'actions') renderActions();
+  else if (s === 'meetings') renderMeetings();
+  else if (s === 'intel') renderIntel();
+  else if (s === 'objectives') renderObjectives();
+  else if (s === 'ingest') renderIngest();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function priorityOrder(p) {
+  return p === 'urgent' ? 0 : p === 'high' ? 1 : 2;
+}
+
+function sortTasks(tasks) {
+  return [...tasks].sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    if (priorityOrder(a.priority) !== priorityOrder(b.priority)) return priorityOrder(a.priority) - priorityOrder(b.priority);
+    return (b.date || '').localeCompare(a.date || '');
+  });
+}
+
+function typeBadge(type) {
+  if (!type) return '';
+  const t = type.toLowerCase();
+  if (t === 'customer') return '<span class="badge badge-customer">Customer</span>';
+  if (t === 'investor') return '<span class="badge badge-investor">Investor</span>';
+  if (t === 'partner') return '<span class="badge badge-partner">Partner</span>';
+  if (t === 'advisory') return '<span class="badge badge-advisory">Advisory</span>';
+  if (t === 'sales') return '<span class="badge badge-sales">Sales</span>';
+  return `<span class="badge badge-general">${type}</span>`;
+}
+
+function priorityBadge(p) {
+  if (p === 'urgent') return '<span class="badge badge-urgent">Urgent</span>';
+  if (p === 'high') return '<span class="badge badge-high">High</span>';
+  return '<span class="badge badge-medium">Medium</span>';
+}
+
+function categoryBadge(c) {
+  if (c === 'sales') return '<span class="badge badge-sales">Sales</span>';
+  if (c === 'product') return '<span class="badge badge-product">Product</span>';
+  if (c === 'ops') return '<span class="badge badge-ops">Ops</span>';
+  return '<span class="badge badge-general">General</span>';
+}
+
+function progressClass(pct) {
+  if (pct >= 70) return 'progress-green';
+  if (pct >= 30) return 'progress-amber';
+  return 'progress-red';
+}
+
+function progressColor(pct) {
+  if (pct >= 70) return 'var(--green)';
+  if (pct >= 30) return 'var(--accent)';
+  return 'var(--red)';
+}
+
+function taskItemHtml(task, compact = false) {
+  return `
+    <div class="task-item" id="task-${task.id}">
+      <div class="task-checkbox ${task.done ? 'checked' : ''}" onclick="toggleTask('${task.id}')"></div>
+      <div class="task-body">
+        <div class="task-title ${task.done ? 'done' : ''}">${esc(task.title)}</div>
+        <div class="task-meta">
+          ${priorityBadge(task.priority)}
+          ${categoryBadge(task.category)}
+          ${task.source ? `<span class="task-source">${esc(task.source)}</span>` : ''}
+          ${task.date ? `<span class="task-source">${task.date}</span>` : ''}
+        </div>
+        ${task.notes && !compact ? `<div class="task-source mt-4" style="color:var(--text3)">${esc(task.notes)}</div>` : ''}
+      </div>
+      <button class="btn btn-icon btn-danger" onclick="deleteTask('${task.id}')" title="Delete task" style="opacity:0.5;flex-shrink:0">✕</button>
+    </div>`;
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────
+function renderDashboard() {
+  const state = getState();
+  const tasks = state.tasks || [];
+  const meetings = state.meetings || [];
+  const objectives = state.objectives || [];
+
+  const open = tasks.filter(t => !t.done);
+  const done = tasks.filter(t => t.done);
+  const urgent = open.filter(t => t.priority === 'urgent');
+  const high = open.filter(t => t.priority === 'high');
+  const rate = tasks.length ? Math.round((done.length / tasks.length) * 100) : 0;
+
+  document.getElementById('dash-subtitle').textContent = `${meetings.length} meetings · ${open.length} open tasks · ${objectives.length} objectives`;
+
+  document.getElementById('stat-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Meetings Logged</div>
+      <div class="stat-value">${meetings.length}</div>
+      <div class="stat-sub">processed by AI</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Open Actions</div>
+      <div class="stat-value" style="color:${open.length > 10 ? 'var(--red)' : 'var(--text)'}">${open.length}</div>
+      <div class="stat-sub">${urgent.length} urgent · ${high.length} high</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Completed</div>
+      <div class="stat-value" style="color:var(--green)">${done.length}</div>
+      <div class="stat-sub">of ${tasks.length} total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Completion Rate</div>
+      <div class="stat-value" style="color:${rate >= 60 ? 'var(--green)' : rate >= 30 ? 'var(--accent)' : 'var(--red)'}">${rate}%</div>
+      <div class="stat-sub">all time</div>
+    </div>
+  `;
+
+  const urgentEl = document.getElementById('urgent-list');
+  const urgentTasks = sortTasks(open.filter(t => t.priority === 'urgent'));
+  urgentEl.innerHTML = urgentTasks.length
+    ? urgentTasks.map(t => taskItemHtml(t, true)).join('')
+    : '<div class="empty-state"><div class="empty-icon">✓</div>No urgent tasks</div>';
+
+  const highEl = document.getElementById('high-list');
+  const highTasks = sortTasks(open.filter(t => t.priority === 'high'));
+  highEl.innerHTML = highTasks.length
+    ? highTasks.map(t => taskItemHtml(t, true)).join('')
+    : '<div class="empty-state"><div class="empty-icon">✓</div>No high-priority tasks</div>';
+
+  const recentEl = document.getElementById('recent-meetings');
+  const recentMeetings = [...meetings].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 4);
+  recentEl.innerHTML = recentMeetings.length
+    ? recentMeetings.map(m => `
+        <div class="task-item" style="cursor:pointer" onclick="navigate('meetings')">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500;color:var(--text)">${esc(m.party)}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              ${typeBadge(m.type)}
+              <span class="mono" style="font-size:11px;color:var(--text3)">${m.date || ''}</span>
+            </div>
+          </div>
+        </div>`).join('')
+    : '<div class="empty-state"><div class="empty-icon">◎</div>No meetings yet</div>';
+
+  const objEl = document.getElementById('dash-objectives');
+  objEl.innerHTML = objectives.length
+    ? objectives.map(o => `
+        <div class="objective-item">
+          <div class="objective-header">
+            <div class="objective-name" style="font-size:13px">${esc(o.name)}</div>
+            <span class="objective-pct" style="color:${progressColor(o.pct)}">${o.pct}%</span>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill ${progressClass(o.pct)}" style="width:${o.pct}%"></div>
+          </div>
+        </div>`).join('')
+    : '<div class="empty-state"><div class="empty-icon">◎</div>No objectives set</div>';
+}
+
+// ── Actions ───────────────────────────────────────────────────────
+function setTaskFilter(filter) {
+  window._taskFilter = filter;
+  document.querySelectorAll('.filter-tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.filter === filter);
+  });
+  renderActions();
+}
+
+function renderActions() {
+  const state = getState();
+  let tasks = state.tasks || [];
+  const filter = window._taskFilter || 'all';
+
+  let filtered;
+  if (filter === 'all') filtered = sortTasks(tasks);
+  else if (filter === 'completed') filtered = sortTasks(tasks.filter(t => t.done));
+  else if (['urgent','high','medium'].includes(filter)) filtered = sortTasks(tasks.filter(t => t.priority === filter && !t.done));
+  else filtered = sortTasks(tasks.filter(t => t.category === filter));
+
+  const open = tasks.filter(t => !t.done).length;
+  document.getElementById('actions-subtitle').textContent = `${open} open · ${tasks.filter(t=>t.done).length} completed`;
+
+  const el = document.getElementById('tasks-list');
+  el.innerHTML = filtered.length
+    ? filtered.map(t => taskItemHtml(t)).join('')
+    : '<div class="empty-state"><div class="empty-icon">✓</div>No tasks match this filter</div>';
+}
+
+function toggleTask(id) {
+  updateState(s => {
+    const t = s.tasks.find(x => x.id === id);
+    if (t) t.done = !t.done;
+  });
+}
+
+function deleteTask(id) {
+  updateState(s => {
+    s.tasks = s.tasks.filter(x => x.id !== id);
+  });
+}
+
+function addTaskManually() {
+  const title = document.getElementById('new-task-title').value.trim();
+  if (!title) return;
+  const priority = document.getElementById('new-task-priority').value;
+  const category = document.getElementById('new-task-category').value;
+  const notes = document.getElementById('new-task-notes').value.trim();
+  updateState(s => {
+    s.tasks.push({
+      id: uid(), title, priority, done: false, category,
+      source: 'Manual', meetingId: null,
+      date: new Date().toISOString().slice(0, 10), notes,
+    });
+  });
+  document.getElementById('new-task-title').value = '';
+  document.getElementById('new-task-notes').value = '';
+}
+
+// ── Meetings ──────────────────────────────────────────────────────
+function renderMeetings() {
+  const state = getState();
+  const meetings = [...(state.meetings || [])].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  document.getElementById('meetings-subtitle').textContent = `${meetings.length} meetings processed`;
+
+  const el = document.getElementById('meetings-list');
+  if (!meetings.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">◎</div>No meetings yet — drop a file in Ingestion Console</div>';
+    return;
+  }
+
+  el.innerHTML = meetings.map(m => `
+    <div class="meeting-card">
+      <div class="meeting-card-header">
+        <div>
+          <div class="meeting-party">${esc(m.party)}</div>
+          <div class="meeting-date">${m.date || ''}</div>
+        </div>
+        <div class="meeting-actions">
+          ${typeBadge(m.type)}
+          <button class="btn btn-icon btn-danger btn-sm" onclick="deleteMeeting('${m.id}')" title="Delete meeting">✕</button>
+        </div>
+      </div>
+      <div class="meeting-context">${esc(m.context)}</div>
+      ${m.insights && m.insights.length ? `
+        <div class="meeting-section-title">Key Insights</div>
+        <ul class="meeting-list">${m.insights.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : ''}
+      ${m.redFlags && m.redFlags.length ? `
+        <div class="meeting-section-title">Red Flags</div>
+        <ul class="meeting-list red">${m.redFlags.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : ''}
+      ${m.opportunities && m.opportunities.length ? `
+        <div class="meeting-section-title">Opportunities</div>
+        <ul class="meeting-list green">${m.opportunities.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : ''}
+    </div>`).join('');
+}
+
+function deleteMeeting(id) {
+  if (!confirm('Delete this meeting and all its associated tasks?')) return;
+  updateState(s => {
+    s.meetings = s.meetings.filter(m => m.id !== id);
+    s.tasks = s.tasks.filter(t => t.meetingId !== id);
+  });
+}
+
+// ── Business Intel ────────────────────────────────────────────────
+function renderIntel() {
+  const state = getState();
+
+  const signalsEl = document.getElementById('intel-signals');
+  signalsEl.innerHTML = (state.signals || []).length
+    ? state.signals.map((s, i) => `
+        <div class="intel-item signal" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <span>${esc(s)}</span>
+          <button class="btn btn-icon btn-danger btn-sm" style="flex-shrink:0;opacity:0.5" onclick="deleteSignal(${i})">✕</button>
+        </div>`).join('')
+    : '<div class="empty-state" style="padding:16px">No signals yet</div>';
+
+  const oppsEl = document.getElementById('intel-opps');
+  oppsEl.innerHTML = (state.opportunities || []).length
+    ? state.opportunities.map((o, i) => `
+        <div class="intel-item opportunity" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <span>${esc(o)}</span>
+          <button class="btn btn-icon btn-danger btn-sm" style="flex-shrink:0;opacity:0.5" onclick="deleteOpportunity(${i})">✕</button>
+        </div>`).join('')
+    : '<div class="empty-state" style="padding:16px">No opportunities yet</div>';
+
+  const risksEl = document.getElementById('intel-risks');
+  risksEl.innerHTML = (state.risks || []).length
+    ? state.risks.map((r, i) => `
+        <div class="intel-item risk" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <span>${esc(r)}</span>
+          <button class="btn btn-icon btn-danger btn-sm" style="flex-shrink:0;opacity:0.5" onclick="deleteRisk(${i})">✕</button>
+        </div>`).join('')
+    : '<div class="empty-state" style="padding:16px">No risks logged</div>';
+
+  const timelineEl = document.getElementById('intel-timeline');
+  const meetings = [...(state.meetings || [])].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  timelineEl.innerHTML = meetings.length
+    ? meetings.map(m => `
+        <div class="timeline-item">
+          <div class="timeline-dot">◎</div>
+          <div class="timeline-body">
+            <div class="timeline-party">${esc(m.party)}</div>
+            <div class="timeline-meta">${typeBadge(m.type)} <span class="mono">${m.date || ''}</span></div>
+            <div class="timeline-preview">${esc(m.context)}</div>
+          </div>
+        </div>`).join('')
+    : '<div class="empty-state">No meetings in timeline</div>';
+}
+
+function addSignal() {
+  const v = document.getElementById('new-signal-input').value.trim();
+  if (!v) return;
+  updateState(s => { s.signals = [...(s.signals || []), v]; });
+  document.getElementById('new-signal-input').value = '';
+}
+
+function deleteSignal(i) {
+  updateState(s => { s.signals.splice(i, 1); });
+}
+
+function addOpportunity() {
+  const v = document.getElementById('new-opp-input').value.trim();
+  if (!v) return;
+  updateState(s => { s.opportunities = [...(s.opportunities || []), v]; });
+  document.getElementById('new-opp-input').value = '';
+}
+
+function deleteOpportunity(i) {
+  updateState(s => { s.opportunities.splice(i, 1); });
+}
+
+function addRisk() {
+  const v = document.getElementById('new-risk-input').value.trim();
+  if (!v) return;
+  updateState(s => { s.risks = [...(s.risks || []), v]; });
+  document.getElementById('new-risk-input').value = '';
+}
+
+function deleteRisk(i) {
+  updateState(s => { s.risks.splice(i, 1); });
+}
+
+// ── Objectives ────────────────────────────────────────────────────
+function renderObjectives() {
+  const state = getState();
+  const objectives = state.objectives || [];
+  const avgPct = objectives.length ? Math.round(objectives.reduce((a, o) => a + o.pct, 0) / objectives.length) : 0;
+  document.getElementById('obj-subtitle').textContent = `${objectives.length} objectives · avg ${avgPct}% complete`;
+
+  const el = document.getElementById('objectives-list');
+  el.innerHTML = objectives.length
+    ? objectives.map(o => `
+        <div class="objective-item">
+          <div class="objective-header">
+            <div class="objective-name">${esc(o.name)}</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="objective-pct" style="color:${progressColor(o.pct)}">${o.pct}%</span>
+              <button class="btn btn-icon btn-sm" onclick="editObjectivePct('${o.id}')" title="Edit progress" style="opacity:0.6">✎</button>
+              <button class="btn btn-icon btn-danger btn-sm" onclick="deleteObjective('${o.id}')" title="Delete" style="opacity:0.5">✕</button>
+            </div>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill ${progressClass(o.pct)}" style="width:${o.pct}%"></div>
+          </div>
+          ${o.desc ? `<div class="objective-evidence">${esc(o.desc)}</div>` : ''}
+        </div>`).join('')
+    : '<div class="empty-state"><div class="empty-icon">◎</div>No objectives yet — add one above</div>';
+}
+
+function addObjective() {
+  const name = document.getElementById('new-obj-name').value.trim();
+  if (!name) return;
+  const pct = parseInt(document.getElementById('new-obj-pct').value) || 0;
+  const desc = document.getElementById('new-obj-desc').value.trim();
+  updateState(s => {
+    s.objectives = [...(s.objectives || []), { id: uid(), name, pct, desc }];
+  });
+  document.getElementById('new-obj-name').value = '';
+  document.getElementById('new-obj-desc').value = '';
+  document.getElementById('new-obj-pct').value = 0;
+  document.getElementById('new-obj-pct-val').textContent = '0%';
+}
+
+function deleteObjective(id) {
+  updateState(s => { s.objectives = s.objectives.filter(o => o.id !== id); });
+}
+
+function editObjectivePct(id) {
+  const obj = getState().objectives.find(o => o.id === id);
+  if (!obj) return;
+  const newPct = prompt(`Update progress for "${obj.name}" (0-100):`, obj.pct);
+  if (newPct === null) return;
+  const pct = Math.max(0, Math.min(100, parseInt(newPct) || 0));
+  updateState(s => {
+    const o = s.objectives.find(x => x.id === id);
+    if (o) o.pct = pct;
+  });
+}
+
+// ── Ingestion Console ─────────────────────────────────────────────
+function renderIngest() {
+  const state = getState();
+  const history = state.ingestionHistory || [];
+  const el = document.getElementById('ingest-history');
+  el.innerHTML = history.length
+    ? [...history].reverse().map(h => `
+        <div class="history-item">
+          <div>
+            <div class="history-filename">${esc(h.filename)}</div>
+            <div class="history-meta">${h.date} · ${h.party || 'unknown party'} · ${h.taskCount || 0} tasks extracted</div>
+          </div>
+          ${typeBadge(h.type)}
+        </div>`).join('')
+    : '<div class="empty-state" style="padding:20px">No files processed yet</div>';
+}
+
+function setDropZoneState(state, message = '') {
+  const dz = document.getElementById('drop-zone');
+  const icon = document.getElementById('dz-icon');
+  const title = document.getElementById('dz-title');
+  const sub = document.getElementById('dz-sub');
+  const input = document.getElementById('file-input');
+
+  dz.className = '';
+  if (state === 'idle') {
+    icon.textContent = '📄';
+    title.textContent = 'Drop your meeting notes here';
+    sub.textContent = 'or click to browse';
+    input.disabled = false;
+  } else if (state === 'drag-over') {
+    dz.classList.add('drag-over');
+    icon.textContent = '📥';
+    title.textContent = 'Release to process';
+    sub.textContent = '';
+  } else if (state === 'processing') {
+    dz.classList.add('processing');
+    icon.textContent = '⚙️';
+    title.textContent = message || 'Processing...';
+    sub.textContent = 'Please wait';
+    input.disabled = true;
+  } else if (state === 'success') {
+    dz.classList.add('success');
+    icon.textContent = '✅';
+    title.textContent = 'Intelligence extracted!';
+    sub.textContent = 'Click to process another file';
+    input.disabled = false;
+  } else if (state === 'error') {
+    dz.classList.add('error');
+    icon.textContent = '⚠️';
+    title.textContent = 'Processing failed';
+    sub.textContent = 'Click to try again';
+    input.disabled = false;
+  }
+}
+
+function showStatus(type, message, showSpinner = false) {
+  const el = document.getElementById('process-status');
+  el.className = `show ${type}`;
+  el.innerHTML = showSpinner
+    ? `<div class="spinner"></div><span>${message}</span>`
+    : `<span>${message}</span>`;
+}
+
+function hideStatus() {
+  document.getElementById('process-status').className = '';
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  setDropZoneState('drag-over');
+}
+
+function handleDragLeave(e) {
+  setDropZoneState('idle');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+  else setDropZoneState('idle');
+}
+
+function handleFileInput(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+  e.target.value = '';
+}
+
+async function processFile(file) {
+  if (PROXY_URL === 'YOUR_RAILWAY_URL_HERE') {
+    setDropZoneState('error');
+    showStatus('error', '⚠️ Backend not configured — update PROXY_URL in index.html with your Railway URL (e.g. http://localhost:3001 for local dev)');
+    return;
+  }
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  const allowed = ['txt', 'md', 'docx', 'pdf'];
+  if (!allowed.includes(ext)) {
+    setDropZoneState('error');
+    showStatus('error', `Unsupported file type .${ext} — use .txt, .md, .docx, or .pdf`);
+    return;
+  }
+
+  try {
+    setDropZoneState('processing', 'Reading file...');
+    showStatus('info', 'Reading file...', true);
+
+    let text = '';
+    if (ext === 'txt' || ext === 'md') {
+      text = await file.text();
+    } else if (ext === 'docx') {
+      text = await extractDocx(file);
+    } else if (ext === 'pdf') {
+      text = await extractPdf(file);
+    }
+
+    if (!text.trim()) throw new Error('File appears to be empty or could not be read');
+
+    setDropZoneState('processing', 'Calling AI intelligence engine...');
+    showStatus('info', 'Calling AI intelligence engine...', true);
+
+    const response = await fetch(`${PROXY_URL}/api/process`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: file.name, content: text }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ error: response.statusText }));
+      throw new Error(err.error || `Server error ${response.status}`);
+    }
+
+    const intel = await response.json();
+
+    setDropZoneState('processing', 'Saving intelligence...');
+    showStatus('info', 'Saving to dashboard...', true);
+
+    const meetingId = uid();
+    const now = new Date().toISOString().slice(0, 10);
+
+    const meeting = {
+      id: meetingId,
+      party: intel.party || file.name,
+      type: intel.type || 'Advisory',
+      date: intel.date || now,
+      context: intel.context || '',
+      insights: intel.insights || [],
+      redFlags: intel.redFlags || [],
+      opportunities: intel.opportunities || [],
+      tasks: [],
+      rawNotes: text.slice(0, 500),
+    };
+
+    const newTasks = (intel.tasks || []).map(t => ({
+      id: uid(),
+      title: t.title,
+      priority: t.priority || 'medium',
+      done: false,
+      category: t.category || 'general',
+      source: intel.party || file.name,
+      meetingId,
+      date: intel.date || now,
+      notes: t.notes || '',
+    }));
+
+    updateState(s => {
+      s.meetings = [...(s.meetings || []), meeting];
+      s.tasks = [...(s.tasks || []), ...newTasks];
+      if (intel.signals) s.signals = [...(s.signals || []), ...intel.signals];
+      if (intel.opportunities) s.opportunities = [...(s.opportunities || []), ...intel.opportunities];
+      if (intel.redFlags) s.risks = [...(s.risks || []), ...intel.redFlags];
+      s.ingestionHistory = [...(s.ingestionHistory || []), {
+        filename: file.name,
+        date: now,
+        party: intel.party,
+        type: intel.type,
+        taskCount: newTasks.length,
+      }];
+    });
+
+    setDropZoneState('success');
+    showStatus('success', `✅ Extracted ${newTasks.length} tasks from "${file.name}" — meeting added to intelligence bank`);
+    renderIngest();
+
+    setTimeout(() => setDropZoneState('idle'), 3000);
+
+  } catch (err) {
+    console.error('Ingestion error:', err);
+    setDropZoneState('error');
+    showStatus('error', `❌ ${err.message}`);
+  }
+}
+
+async function extractDocx(file) {
+  if (typeof JSZip === 'undefined') throw new Error('JSZip not loaded — check CDN connection');
+  const arrayBuffer = await file.arrayBuffer();
+  const zip = await JSZip.loadAsync(arrayBuffer);
+  const wordDoc = zip.file('word/document.xml');
+  if (!wordDoc) throw new Error('Invalid .docx file — word/document.xml not found');
+  const xml = await wordDoc.async('string');
+  return xml
+    .replace(/<w:br[^>]*/g, '\n')
+    .replace(/<w:p[ >][^>]*>/g, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+async function extractPdf(file) {
+  if (typeof pdfjsLib === 'undefined') throw new Error('pdf.js not loaded — check CDN connection');
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(item => item.str).join(' ') + '\n';
+  }
+  return text.trim();
+}
+
+function clearAllData() {
+  if (!confirm('This will permanently delete all meetings, tasks, objectives and intelligence. Are you sure?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  window._state = JSON.parse(JSON.stringify(SEED));
+  saveState(window._state);
+  renderCurrentSection();
+  showStatus('success', '✅ All data cleared — seed data reloaded');
+}
+
+// ── Keyboard shortcuts ────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const shortcuts = { '1': 'dashboard', '2': 'actions', '3': 'meetings', '4': 'intel', '5': 'objectives', '6': 'ingest' };
+  if (shortcuts[e.key]) navigate(shortcuts[e.key]);
+});
+
+// ── Boot ──────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
