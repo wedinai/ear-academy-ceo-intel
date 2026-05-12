@@ -7,21 +7,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
-<!-- JSZip for .docx extraction -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<!-- pdf.js for .pdf extraction -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root {
-  --bg: #0e0e0f;
-  --bg2: #161618;
-  --bg3: #1e1e21;
-  --bg4: #27272b;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #f0efe8;
-  --text2: #9a9891;
-  --text3: #5a5955;
+  --bg: #15151a;
+  --bg2: #1e1e24;
+  --bg3: #262630;
+  --bg4: #30303a;
+  --border: rgba(255,255,255,0.12);
+  --border2: rgba(255,255,255,0.18);
+  --text: #f5f4ef;
+  --text2: #b8b6af;
+  --text3: #8a8881;
   --accent: #e8b84b;
   --green: #4caf7d;
   --red: #e05a4b;
@@ -31,178 +29,46 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 16px; line-height: 1.55; }
 
-html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Instrument Sans', system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
-}
+/* ── Layout ── */
+#app { display: grid; grid-template-rows: 56px 1fr; grid-template-columns: 220px 1fr; grid-template-areas: "topbar topbar" "sidebar main"; height: 100vh; overflow: hidden; }
 
-/* ── Layout ────────────────────────────────────── */
-#app {
-  display: grid;
-  grid-template-rows: 56px 1fr;
-  grid-template-columns: 220px 1fr;
-  grid-template-areas:
-    "topbar topbar"
-    "sidebar main";
-  height: 100vh;
-  overflow: hidden;
-}
-
-#topbar {
-  grid-area: topbar;
-  background: var(--bg2);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  gap: 12px;
-  position: relative;
-  z-index: 10;
-}
-
-#topbar .logo {
-  font-family: 'DM Serif Display', serif;
-  font-size: 18px;
-  color: var(--accent);
-  letter-spacing: -0.3px;
-}
-
-#topbar .tagline {
-  color: var(--text3);
-  font-size: 12px;
-  font-family: 'DM Mono', monospace;
-}
-
+#topbar { grid-area: topbar; background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 12px; position: relative; z-index: 10; }
+#topbar .logo { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--accent); letter-spacing: -0.3px; }
+#topbar .tagline { color: var(--text3); font-size: 13px; font-family: 'DM Mono', monospace; }
 #topbar .spacer { flex: 1; }
+#topbar .today { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text3); }
 
-#topbar .today {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--text3);
-}
+#hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px; color: var(--text2); }
 
-#hamburger {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  color: var(--text2);
-}
-
-#sidebar {
-  grid-area: sidebar;
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
-  overflow-y: auto;
-  padding: 16px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 16px;
-  cursor: pointer;
-  color: var(--text2);
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 0;
-  transition: background 0.15s, color 0.15s;
-  user-select: none;
-}
-
+#sidebar { grid-area: sidebar; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 2px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; cursor: pointer; color: var(--text2); font-size: 15px; font-weight: 500; transition: background 0.15s, color 0.15s; user-select: none; }
 .nav-item:hover { background: var(--bg3); color: var(--text); }
 .nav-item.active { background: var(--bg3); color: var(--accent); }
-.nav-item .nav-icon { width: 16px; text-align: center; font-size: 14px; flex-shrink: 0; }
-.nav-section-label {
-  padding: 16px 16px 6px;
-  font-size: 10px;
-  font-family: 'DM Mono', monospace;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
+.nav-item .nav-icon { width: 16px; text-align: center; font-size: 15px; flex-shrink: 0; }
+.nav-item .spacer { flex: 1; }
+.nav-section-label { padding: 16px 16px 6px; font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
 
-#main {
-  grid-area: main;
-  overflow-y: auto;
-  padding: 28px 32px;
-}
+/* Sidebar badges */
+.nav-badge { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; min-width: 18px; text-align: center; }
+.nav-badge-red { background: rgba(224,90,75,0.22); color: var(--red); }
+.nav-badge-muted { background: var(--bg4); color: var(--text3); }
 
-/* ── Cards ─────────────────────────────────────── */
-.card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 20px;
-}
+#main { grid-area: main; overflow-y: auto; padding: 28px 32px; }
 
-.card-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 15px;
-  color: var(--text);
-  margin-bottom: 14px;
-}
+/* ── Cards ── */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.card-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--text); margin-bottom: 14px; }
 
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 24px;
-}
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+.stat-card .stat-label { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+.stat-card .stat-value { font-family: 'DM Serif Display', serif; font-size: 38px; color: var(--text); line-height: 1; }
+.stat-card .stat-sub { font-size: 13px; color: var(--text3); margin-top: 4px; }
 
-.stat-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 18px 20px;
-}
-
-.stat-card .stat-label {
-  font-size: 11px;
-  color: var(--text3);
-  font-family: 'DM Mono', monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 6px;
-}
-
-.stat-card .stat-value {
-  font-family: 'DM Serif Display', serif;
-  font-size: 32px;
-  color: var(--text);
-  line-height: 1;
-}
-
-.stat-card .stat-sub {
-  font-size: 11px;
-  color: var(--text3);
-  margin-top: 4px;
-}
-
-/* ── Badges ─────────────────────────────────────── */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  font-family: 'DM Mono', monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  flex-shrink: 0;
-}
-
+/* ── Badges ── */
+.badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.4px; flex-shrink: 0; }
 .badge-urgent { background: rgba(224,90,75,0.18); color: var(--red); }
 .badge-high { background: rgba(232,184,75,0.18); color: var(--accent); }
 .badge-medium { background: rgba(90,159,212,0.18); color: var(--blue); }
@@ -216,555 +82,226 @@ html, body {
 .badge-partner { background: rgba(90,159,212,0.18); color: var(--blue); }
 .badge-advisory { background: rgba(232,184,75,0.18); color: var(--accent); }
 
-/* ── Section header ─────────────────────────────── */
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
+/* ── Status pills (team tasks) ── */
+.status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; font-family: 'DM Mono', monospace; cursor: pointer; user-select: none; transition: opacity 0.15s; border: none; outline: none; }
+.status-pill:hover { opacity: 0.8; }
+.status-todo { background: var(--bg4); color: var(--text3); }
+.status-in-progress { background: rgba(90,159,212,0.18); color: var(--blue); }
+.status-stuck { background: rgba(224,90,75,0.18); color: var(--red); }
+.status-done { background: rgba(76,175,125,0.18); color: var(--green); }
 
-.section-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 22px;
-  color: var(--text);
-}
+/* ── Section header ── */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.section-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--text); }
+.section-sub { font-size: 13px; color: var(--text3); font-family: 'DM Mono', monospace; margin-top: 3px; }
 
-.section-sub {
-  font-size: 12px;
-  color: var(--text3);
-  font-family: 'DM Mono', monospace;
-  margin-top: 2px;
-}
-
-/* ── Task items ─────────────────────────────────── */
-.task-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
-
+/* ── Task items ── */
+.task-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
 .task-item:last-child { border-bottom: none; }
+.task-item.stuck { border-left: 3px solid var(--red); padding-left: 10px; margin-left: -13px; }
 
-.task-checkbox {
-  width: 18px;
-  height: 18px;
-  border: 1.5px solid var(--border2);
-  border-radius: 4px;
-  cursor: pointer;
-  flex-shrink: 0;
-  margin-top: 1px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.task-checkbox.checked {
-  background: var(--green);
-  border-color: var(--green);
-}
-
+.task-checkbox { width: 18px; height: 18px; border: 1.5px solid var(--border2); border-radius: 4px; cursor: pointer; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; }
+.task-checkbox.checked { background: var(--green); border-color: var(--green); }
 .task-checkbox.checked::after { content: '✓'; color: #fff; font-size: 11px; }
 
 .task-body { flex: 1; min-width: 0; }
+.task-title { font-size: 15px; color: var(--text); margin-bottom: 5px; line-height: 1.45; }
+.task-title.done { color: var(--text3); text-decoration: line-through; }
+.task-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.task-source { font-size: 13px; color: var(--text3); font-family: 'DM Mono', monospace; }
 
-.task-title {
-  font-size: 13px;
-  color: var(--text);
-  margin-bottom: 4px;
-  line-height: 1.4;
-}
-
-.task-title.done {
-  color: var(--text3);
-  text-decoration: line-through;
-}
-
-.task-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.task-source {
-  font-size: 11px;
-  color: var(--text3);
-  font-family: 'DM Mono', monospace;
-}
-
-/* ── Filter tabs ────────────────────────────────── */
-.filter-tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.filter-tab {
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text2);
-  transition: all 0.15s;
-}
-
+/* ── Filter tabs ── */
+.filter-tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-tab { padding: 7px 15px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text2); transition: all 0.15s; font-family: inherit; }
 .filter-tab:hover { background: var(--bg3); color: var(--text); }
 .filter-tab.active { background: var(--bg3); color: var(--accent); border-color: rgba(232,184,75,0.3); }
 
-/* ── Meeting cards ──────────────────────────────── */
-.meeting-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 14px;
-}
+/* ── Team Tasks two-panel layout ── */
+.team-tasks-layout { display: grid; grid-template-columns: 200px 1fr; gap: 20px; }
+.team-member-tabs { display: flex; flex-direction: column; gap: 4px; }
+.member-tab { padding: 9px 13px; border-radius: 7px; font-size: 15px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text2); transition: all 0.15s; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-family: inherit; }
+.member-tab:hover { background: var(--bg3); color: var(--text); }
+.member-tab.active { background: var(--bg3); color: var(--accent); border-color: rgba(232,184,75,0.3); }
+.member-tab-count { font-family: 'DM Mono', monospace; font-size: 11px; padding: 2px 6px; border-radius: 10px; background: var(--bg4); color: var(--text3); }
+.member-tab-count.urgent { background: rgba(224,90,75,0.18); color: var(--red); }
 
-.meeting-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
+/* ── Stuck banner ── */
+.stuck-banner { background: rgba(232,184,75,0.08); border: 1px solid rgba(232,184,75,0.2); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px; }
+.stuck-banner-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.stuck-banner-body { flex: 1; }
+.stuck-banner-title { font-size: 15px; font-weight: 600; color: var(--accent); margin-bottom: 5px; }
+.stuck-banner-items { font-size: 14px; color: var(--text2); line-height: 1.6; }
+.stuck-banner-dismiss { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; flex-shrink: 0; padding: 2px; }
+.stuck-banner-dismiss:hover { color: var(--text2); }
 
-.meeting-party {
-  font-family: 'DM Serif Display', serif;
-  font-size: 16px;
-  color: var(--text);
-}
+/* ── Team task row ── */
+.team-task-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+.team-task-item:last-child { border-bottom: none; }
+.team-task-item.stuck { border-left: 3px solid var(--red); padding-left: 10px; margin-left: -3px; }
+.team-task-main { flex: 1; min-width: 0; }
+.team-task-title { font-size: 15px; color: var(--text); margin-bottom: 5px; line-height: 1.45; }
+.team-task-title.done { color: var(--text3); text-decoration: line-through; }
+.team-task-sub { font-size: 13px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.team-task-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
-.meeting-date {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--text3);
-  margin-top: 3px;
-}
+.reassign-select { background: var(--bg3); border: 1px solid var(--border); border-radius: 5px; color: var(--text2); font-size: 13px; font-family: 'DM Mono', monospace; padding: 3px 7px; cursor: pointer; outline: none; }
+.reassign-select:hover { border-color: var(--border2); }
 
-.meeting-context {
-  font-size: 13px;
-  color: var(--text2);
-  margin-bottom: 14px;
-  line-height: 1.5;
-}
+/* ── Team management page ── */
+.team-member-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.team-member-row:last-child { border-bottom: none; }
+.member-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--bg4); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--accent); flex-shrink: 0; font-family: 'DM Serif Display', serif; }
+.member-name { font-size: 16px; font-weight: 500; color: var(--text); flex: 1; }
+.member-workload { display: flex; align-items: center; gap: 10px; }
+.workload-bar-wrap { width: 80px; height: 5px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
+.workload-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+.workload-label { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text3); white-space: nowrap; }
+.workload-stuck { color: var(--red); font-weight: 600; }
 
-.meeting-section-title {
-  font-size: 11px;
-  font-family: 'DM Mono', monospace;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 6px;
-  margin-top: 12px;
-}
+/* ── Team Pulse card ── */
+.pulse-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.pulse-row:last-child { border-bottom: none; }
+.pulse-member { font-size: 15px; color: var(--text2); }
+.pulse-count { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text3); }
 
-.meeting-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.meeting-list li {
-  font-size: 13px;
-  color: var(--text2);
-  padding-left: 14px;
-  position: relative;
-  line-height: 1.5;
-}
-
-.meeting-list li::before {
-  content: '—';
-  position: absolute;
-  left: 0;
-  color: var(--text3);
-}
-
+/* ── Meeting cards ── */
+.meeting-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 14px; }
+.meeting-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.meeting-party { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
+.meeting-date { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text3); margin-top: 4px; }
+.meeting-context { font-size: 15px; color: var(--text2); margin-bottom: 14px; line-height: 1.6; }
+.meeting-section-title { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 7px; margin-top: 14px; }
+.meeting-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.meeting-list li { font-size: 15px; color: var(--text2); padding-left: 14px; position: relative; line-height: 1.6; }
+.meeting-list li::before { content: '—'; position: absolute; left: 0; color: var(--text3); }
 .meeting-list.red li::before { color: var(--red); content: '!'; }
 .meeting-list.green li::before { color: var(--green); content: '↗'; }
+.meeting-actions { display: flex; align-items: center; gap: 8px; }
 
-.meeting-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ── Buttons ────────────────────────────────────── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 7px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--bg3);
-  color: var(--text);
-  transition: all 0.15s;
-  font-family: inherit;
-  text-decoration: none;
-}
-
+/* ── Buttons ── */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 17px; border-radius: 7px; font-size: 15px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--bg3); color: var(--text); transition: all 0.15s; font-family: inherit; text-decoration: none; }
 .btn:hover { background: var(--bg4); border-color: var(--border2); }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #0e0e0f; font-weight: 600; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #15151a; font-weight: 600; }
 .btn-primary:hover { background: #f0c55a; border-color: #f0c55a; }
 .btn-danger { color: var(--red); border-color: rgba(224,90,75,0.2); background: rgba(224,90,75,0.08); }
 .btn-danger:hover { background: rgba(224,90,75,0.18); }
-.btn-sm { padding: 5px 11px; font-size: 12px; }
-.btn-icon { padding: 6px; width: 30px; height: 30px; justify-content: center; }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+.btn-icon { padding: 6px; width: 32px; height: 32px; justify-content: center; }
 
-/* ── Progress bars ──────────────────────────────── */
-.progress-bar-wrap {
-  height: 6px;
-  background: var(--bg4);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-top: 6px;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.4s ease;
-}
-
+/* ── Progress bars ── */
+.progress-bar-wrap { height: 6px; background: var(--bg4); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+.progress-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
 .progress-green { background: var(--green); }
 .progress-amber { background: var(--accent); }
 .progress-red { background: var(--red); }
 
-/* ── Objective items ────────────────────────────── */
-.objective-item {
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border);
-}
-
+/* ── Objectives ── */
+.objective-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
 .objective-item:last-child { border-bottom: none; }
+.objective-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 12px; }
+.objective-name { font-size: 16px; font-weight: 500; color: var(--text); }
+.objective-pct { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; flex-shrink: 0; }
+.objective-evidence { font-size: 14px; color: var(--text3); margin-top: 7px; line-height: 1.5; }
 
-.objective-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  gap: 12px;
-}
-
-.objective-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.objective-pct {
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
-  font-weight: 500;
-  flex-shrink: 0;
-}
-
-.objective-evidence {
-  font-size: 12px;
-  color: var(--text3);
-  margin-top: 6px;
-  line-height: 1.4;
-}
-
-/* ── Forms ──────────────────────────────────────── */
+/* ── Forms ── */
 .form-group { margin-bottom: 14px; }
-
-.form-label {
-  display: block;
-  font-size: 12px;
-  color: var(--text2);
-  margin-bottom: 5px;
-  font-weight: 500;
-}
-
-.form-input, .form-select, .form-textarea {
-  width: 100%;
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  border-radius: 7px;
-  padding: 8px 12px;
-  color: var(--text);
-  font-size: 13px;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-  border-color: var(--accent);
-}
-
+.form-label { display: block; font-size: 14px; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+.form-input, .form-select, .form-textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: 7px; padding: 10px 13px; color: var(--text); font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
 .form-select option { background: var(--bg3); }
 .form-textarea { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.range-input { width: 100%; accent-color: var(--accent); cursor: pointer; }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.range-input {
-  width: 100%;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
-/* ── Drag and Drop Zone ──────────────────────────── */
-#drop-zone {
-  border: 2px dashed var(--border2);
-  border-radius: 14px;
-  padding: 56px 32px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: var(--bg3);
-  position: relative;
-}
-
-#drop-zone:hover, #drop-zone.drag-over {
-  border-color: var(--accent);
-  background: rgba(232,184,75,0.04);
-}
-
+/* ── Drop zone ── */
+#drop-zone { border: 2px dashed var(--border2); border-radius: 14px; padding: 56px 32px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg3); position: relative; }
+#drop-zone:hover, #drop-zone.drag-over { border-color: var(--accent); background: rgba(232,184,75,0.04); }
 #drop-zone.drag-over { transform: scale(1.005); }
 #drop-zone.processing { border-color: var(--blue); background: rgba(90,159,212,0.05); cursor: default; }
 #drop-zone.success { border-color: var(--green); background: rgba(76,175,125,0.05); }
 #drop-zone.error { border-color: var(--red); background: rgba(224,90,75,0.05); }
+.drop-zone-icon { font-size: 44px; margin-bottom: 14px; line-height: 1; }
+.drop-zone-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); margin-bottom: 8px; }
+.drop-zone-sub { font-size: 15px; color: var(--text2); margin-bottom: 7px; }
+.drop-zone-formats { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text3); }
+#drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 
-.drop-zone-icon {
-  font-size: 40px;
-  margin-bottom: 14px;
-  line-height: 1;
-}
-
-.drop-zone-title {
-  font-family: 'DM Serif Display', serif;
-  font-size: 20px;
-  color: var(--text);
-  margin-bottom: 8px;
-}
-
-.drop-zone-sub {
-  font-size: 13px;
-  color: var(--text2);
-  margin-bottom: 6px;
-}
-
-.drop-zone-formats {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--text3);
-}
-
-#drop-zone input[type="file"] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
-}
-
-/* ── Processing status ───────────────────────────── */
-#process-status {
-  margin-top: 16px;
-  padding: 14px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  display: none;
-  align-items: center;
-  gap: 10px;
-}
-
+/* ── Process status ── */
+#process-status { margin-top: 16px; padding: 14px 18px; border-radius: 8px; font-size: 13px; display: none; align-items: center; gap: 10px; }
 #process-status.show { display: flex; }
 #process-status.info { background: rgba(90,159,212,0.1); color: var(--blue); border: 1px solid rgba(90,159,212,0.2); }
 #process-status.success { background: rgba(76,175,125,0.1); color: var(--green); border: 1px solid rgba(76,175,125,0.2); }
 #process-status.error { background: rgba(224,90,75,0.1); color: var(--red); border: 1px solid rgba(224,90,75,0.2); }
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(90,159,212,0.3);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(90,159,212,0.3); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Ingestion history ───────────────────────────── */
-.history-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 13px;
-}
-
+/* ── History ── */
+.history-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
 .history-item:last-child { border-bottom: none; }
 .history-filename { color: var(--text); font-weight: 500; }
 .history-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); margin-top: 2px; }
 
-/* ── Signal / Risk / Opp items ──────────────────── */
-.intel-item {
-  padding: 10px 14px;
-  background: var(--bg3);
-  border-radius: 7px;
-  font-size: 13px;
-  color: var(--text2);
-  line-height: 1.5;
-  margin-bottom: 8px;
-  border-left: 3px solid var(--border2);
-}
-
+/* ── Intel ── */
+.intel-item { padding: 10px 14px; background: var(--bg3); border-radius: 7px; font-size: 13px; color: var(--text2); line-height: 1.5; margin-bottom: 8px; border-left: 3px solid var(--border2); }
 .intel-item.signal { border-left-color: var(--blue); }
 .intel-item.opportunity { border-left-color: var(--green); }
 .intel-item.risk { border-left-color: var(--red); }
 
-/* ── Timeline ───────────────────────────────────── */
-.timeline-item {
-  display: flex;
-  gap: 16px;
-  padding-bottom: 20px;
-  position: relative;
-}
-
-.timeline-item::after {
-  content: '';
-  position: absolute;
-  left: 18px;
-  top: 38px;
-  bottom: 0;
-  width: 1px;
-  background: var(--border);
-}
-
+/* ── Timeline ── */
+.timeline-item { display: flex; gap: 16px; padding-bottom: 20px; position: relative; }
+.timeline-item::after { content: ''; position: absolute; left: 18px; top: 38px; bottom: 0; width: 1px; background: var(--border); }
 .timeline-item:last-child::after { display: none; }
-
-.timeline-dot {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--bg3);
-  border: 2px solid var(--border2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
+.timeline-dot { width: 36px; height: 36px; border-radius: 50%; background: var(--bg3); border: 2px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
 .timeline-body { flex: 1; }
 .timeline-party { font-weight: 500; font-size: 14px; color: var(--text); }
 .timeline-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); margin-top: 2px; }
 .timeline-preview { font-size: 12px; color: var(--text2); margin-top: 6px; line-height: 1.5; }
 
-/* ── Section grid helpers ───────────────────────── */
+/* ── Helpers ── */
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-
-/* ── Divider ────────────────────────────────────── */
 .divider { height: 1px; background: var(--border); margin: 20px 0; }
-
-/* ── Empty state ────────────────────────────────── */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text3);
-  font-size: 13px;
-}
-
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 13px; }
 .empty-state .empty-icon { font-size: 28px; margin-bottom: 10px; }
-
-/* ── Responsive ─────────────────────────────────── */
-@media (max-width: 768px) {
-  #app {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "topbar"
-      "main";
-  }
-  #sidebar {
-    position: fixed;
-    top: 56px;
-    left: -220px;
-    width: 220px;
-    height: calc(100vh - 56px);
-    z-index: 100;
-    transition: left 0.25s;
-  }
-  #sidebar.open { left: 0; }
-  #hamburger { display: flex; }
-  #main { padding: 20px 16px; }
-  .stat-grid { grid-template-columns: repeat(2, 1fr); }
-  .two-col { grid-template-columns: 1fr; }
-  .three-col { grid-template-columns: 1fr; }
-  .form-row { grid-template-columns: 1fr; }
-}
-
-/* ── Utils ──────────────────────────────────────── */
+.add-form { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 20px; }
+.add-form-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 14px; }
 .hidden { display: none !important; }
 .mono { font-family: 'DM Mono', monospace; }
-.text2 { color: var(--text2); }
-.text3 { color: var(--text3); }
-.accent { color: var(--accent); }
-.green { color: var(--green); }
-.red { color: var(--red); }
-.flex-center { display: flex; align-items: center; gap: 8px; }
-.gap-8 { gap: 8px; }
-.mt-4 { margin-top: 4px; }
 .mt-8 { margin-top: 8px; }
 .mt-12 { margin-top: 12px; }
 .mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
 .mt-24 { margin-top: 24px; }
-.mb-12 { margin-bottom: 12px; }
 .mb-16 { margin-bottom: 16px; }
 .mb-20 { margin-bottom: 20px; }
+.flex-center { display: flex; align-items: center; gap: 8px; }
+.link-btn { background: none; border: none; color: var(--accent); font-size: 12px; cursor: pointer; font-family: inherit; padding: 0; text-decoration: underline; }
+.link-btn:hover { color: var(--text); }
 
-/* ── Scrollbar ──────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border2); }
 
-/* ── Add form collapsed ─────────────────────────── */
-.add-form {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 18px;
-  margin-bottom: 20px;
-}
-
-.add-form-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text2);
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+@media (max-width: 768px) {
+  #app { grid-template-columns: 1fr; grid-template-areas: "topbar" "main"; }
+  #sidebar { position: fixed; top: 56px; left: -220px; width: 220px; height: calc(100vh - 56px); z-index: 100; transition: left 0.25s; }
+  #sidebar.open { left: 0; }
+  #hamburger { display: flex; }
+  #main { padding: 20px 16px; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .form-row-3 { grid-template-columns: 1fr; }
+  .team-tasks-layout { grid-template-columns: 1fr; }
+  .team-member-tabs { flex-direction: row; flex-wrap: wrap; }
 }
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- ── Topbar ── -->
+  <!-- Topbar -->
   <header id="topbar">
     <button id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -777,7 +314,7 @@ html, body {
     <div class="today mono" id="today-date"></div>
   </header>
 
-  <!-- ── Sidebar ── -->
+  <!-- Sidebar -->
   <nav id="sidebar">
     <div class="nav-section-label">Overview</div>
     <div class="nav-item active" onclick="navigate('dashboard')" data-section="dashboard">
@@ -785,25 +322,37 @@ html, body {
     </div>
     <div class="nav-section-label">Work</div>
     <div class="nav-item" onclick="navigate('actions')" data-section="actions">
-      <span class="nav-icon">✓</span> Action Items
+      <span class="nav-icon">✓</span> My Tasks
+      <span class="spacer"></span>
+      <span class="nav-badge nav-badge-red hidden" id="badge-urgent"></span>
+    </div>
+    <div class="nav-item" onclick="navigate('teamtasks')" data-section="teamtasks">
+      <span class="nav-icon">◈</span> Team Tasks
+      <span class="spacer"></span>
+      <span class="nav-badge nav-badge-red hidden" id="badge-stuck"></span>
     </div>
     <div class="nav-item" onclick="navigate('meetings')" data-section="meetings">
-      <span class="nav-icon">◎</span> Meeting Intel
+      <span class="nav-icon">◎</span> Meetings
     </div>
-    <div class="nav-section-label">Strategy</div>
     <div class="nav-item" onclick="navigate('intel')" data-section="intel">
       <span class="nav-icon">◈</span> Business Intel
     </div>
     <div class="nav-item" onclick="navigate('objectives')" data-section="objectives">
-      <span class="nav-icon">◎</span> Q1 Objectives
+      <span class="nav-icon">◉</span> Q1 Objectives
     </div>
-    <div class="nav-section-label">Input</div>
+    <div class="nav-section-label">Team</div>
+    <div class="nav-item" onclick="navigate('team')" data-section="team">
+      <span class="nav-icon">◎</span> Team
+      <span class="spacer"></span>
+      <span class="nav-badge nav-badge-muted" id="badge-members"></span>
+    </div>
+    <div class="nav-section-label">System</div>
     <div class="nav-item" onclick="navigate('ingest')" data-section="ingest">
       <span class="nav-icon">↑</span> Ingestion Console
     </div>
   </nav>
 
-  <!-- ── Main content ── -->
+  <!-- Main -->
   <main id="main">
 
     <!-- ════ DASHBOARD ════ -->
@@ -811,20 +360,18 @@ html, body {
       <div class="section-header">
         <div>
           <div class="section-title">Good morning, Rus</div>
-          <div class="section-sub mono" id="dash-subtitle">Loading intelligence...</div>
+          <div class="section-sub mono" id="dash-subtitle"></div>
         </div>
         <button class="btn btn-sm" onclick="navigate('ingest')">+ Process Meeting</button>
       </div>
-
       <div class="stat-grid" id="stat-grid"></div>
-
       <div class="two-col">
         <div>
-          <div class="card mb-16" id="dash-urgent">
+          <div class="card mb-16">
             <div class="card-title">🚨 Urgent — Next 48 Hours</div>
             <div id="urgent-list"></div>
           </div>
-          <div class="card" id="dash-high">
+          <div class="card">
             <div class="card-title">⚡ High Priority — This Week</div>
             <div id="high-list"></div>
           </div>
@@ -834,6 +381,10 @@ html, body {
             <div class="card-title">Recent Meetings</div>
             <div id="recent-meetings"></div>
           </div>
+          <div class="card mb-16">
+            <div class="card-title">👥 Team Pulse</div>
+            <div id="team-pulse"></div>
+          </div>
           <div class="card">
             <div class="card-title">Q1 Objectives</div>
             <div id="dash-objectives"></div>
@@ -842,22 +393,29 @@ html, body {
       </div>
     </section>
 
-    <!-- ════ ACTION ITEMS ════ -->
+    <!-- ════ MY TASKS ════ -->
     <section id="section-actions" class="hidden">
       <div class="section-header">
         <div>
-          <div class="section-title">Action Items</div>
+          <div class="section-title">My Tasks</div>
           <div class="section-sub mono" id="actions-subtitle"></div>
         </div>
       </div>
-
       <div class="add-form">
-        <div class="add-form-title">+ Add Task Manually</div>
+        <div class="add-form-title">+ Add Task</div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Task Title</label>
+            <label class="form-label">Task</label>
             <input type="text" class="form-input" id="new-task-title" placeholder="Describe the task..." />
           </div>
+          <div class="form-group">
+            <label class="form-label">Assigned To</label>
+            <select class="form-select" id="new-task-owner">
+              <option value="Rus">Me (Rus)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row-3">
           <div class="form-group">
             <label class="form-label">Priority</label>
             <select class="form-select" id="new-task-priority">
@@ -866,8 +424,6 @@ html, body {
               <option value="medium">Medium</option>
             </select>
           </div>
-        </div>
-        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Category</label>
             <select class="form-select" id="new-task-category">
@@ -878,15 +434,14 @@ html, body {
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Notes (optional)</label>
-            <input type="text" class="form-input" id="new-task-notes" placeholder="Why does this matter?" />
+            <label class="form-label">Notes</label>
+            <input type="text" class="form-input" id="new-task-notes" placeholder="Optional context..." />
           </div>
         </div>
         <button class="btn btn-primary btn-sm" onclick="addTaskManually()">Add Task</button>
       </div>
-
-      <div class="filter-tabs" id="task-filter-tabs">
-        <button class="filter-tab active" onclick="setTaskFilter('all')" data-filter="all">All</button>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setTaskFilter('all')" data-filter="all">All Mine</button>
         <button class="filter-tab" onclick="setTaskFilter('urgent')" data-filter="urgent">Urgent</button>
         <button class="filter-tab" onclick="setTaskFilter('high')" data-filter="high">High</button>
         <button class="filter-tab" onclick="setTaskFilter('medium')" data-filter="medium">Medium</button>
@@ -894,11 +449,37 @@ html, body {
         <button class="filter-tab" onclick="setTaskFilter('sales')" data-filter="sales">Sales</button>
         <button class="filter-tab" onclick="setTaskFilter('product')" data-filter="product">Product</button>
       </div>
-
       <div id="tasks-list"></div>
     </section>
 
-    <!-- ════ MEETING INTELLIGENCE ════ -->
+    <!-- ════ TEAM TASKS ════ -->
+    <section id="section-teamtasks" class="hidden">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Team Tasks</div>
+          <div class="section-sub mono" id="teamtasks-subtitle"></div>
+        </div>
+        <button class="btn btn-sm" onclick="navigate('actions')">+ Add Task</button>
+      </div>
+      <div id="stuck-banner"></div>
+      <div class="team-tasks-layout">
+        <div>
+          <div class="team-member-tabs" id="member-tabs"></div>
+        </div>
+        <div>
+          <div class="filter-tabs" id="status-filter-tabs">
+            <button class="filter-tab active" onclick="setStatusFilter('all')" data-status="all">All</button>
+            <button class="filter-tab" onclick="setStatusFilter('todo')" data-status="todo">To Do</button>
+            <button class="filter-tab" onclick="setStatusFilter('in-progress')" data-status="in-progress">In Progress</button>
+            <button class="filter-tab" onclick="setStatusFilter('stuck')" data-status="stuck">Stuck</button>
+            <button class="filter-tab" onclick="setStatusFilter('done')" data-status="done">Done</button>
+          </div>
+          <div id="team-tasks-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ MEETINGS ════ -->
     <section id="section-meetings" class="hidden">
       <div class="section-header">
         <div>
@@ -918,7 +499,6 @@ html, body {
           <div class="section-sub mono">Cross-meeting patterns, signals & risks</div>
         </div>
       </div>
-
       <div class="two-col mb-20">
         <div class="card">
           <div class="card-title">📡 Market Signals</div>
@@ -937,7 +517,6 @@ html, body {
           </div>
         </div>
       </div>
-
       <div class="card mb-20">
         <div class="card-title">⚠️ Risk Register</div>
         <div id="intel-risks"></div>
@@ -946,7 +525,6 @@ html, body {
           <button class="btn btn-sm" onclick="addRisk()">Add</button>
         </div>
       </div>
-
       <div class="card">
         <div class="card-title">📅 Activity Timeline</div>
         <div id="intel-timeline"></div>
@@ -961,7 +539,6 @@ html, body {
           <div class="section-sub mono" id="obj-subtitle"></div>
         </div>
       </div>
-
       <div class="add-form mb-20">
         <div class="add-form-title">+ Add Objective</div>
         <div class="form-row">
@@ -972,7 +549,7 @@ html, body {
           <div class="form-group">
             <label class="form-label">Progress %</label>
             <input type="range" class="range-input" id="new-obj-pct" min="0" max="100" value="0" oninput="document.getElementById('new-obj-pct-val').textContent=this.value+'%'" />
-            <span class="mono text3" id="new-obj-pct-val">0%</span>
+            <span class="mono" style="font-size:12px;color:var(--text3)" id="new-obj-pct-val">0%</span>
           </div>
         </div>
         <div class="form-group">
@@ -981,9 +558,26 @@ html, body {
         </div>
         <button class="btn btn-primary btn-sm" onclick="addObjective()">Add Objective</button>
       </div>
+      <div class="card"><div id="objectives-list"></div></div>
+    </section>
 
+    <!-- ════ TEAM ════ -->
+    <section id="section-team" class="hidden">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Team</div>
+          <div class="section-sub mono" id="team-subtitle"></div>
+        </div>
+      </div>
+      <div class="add-form mb-20">
+        <div class="add-form-title">+ Add Team Member</div>
+        <div class="flex-center">
+          <input type="text" class="form-input" id="new-member-name" placeholder="Full name or role (e.g. Brandon, Content Team)..." style="flex:1" />
+          <button class="btn btn-primary btn-sm" onclick="addTeamMember()">Add</button>
+        </div>
+      </div>
       <div class="card">
-        <div id="objectives-list"></div>
+        <div id="team-members-list"></div>
       </div>
     </section>
 
@@ -996,7 +590,6 @@ html, body {
         </div>
         <button class="btn btn-sm btn-danger" onclick="clearAllData()">Clear All Data</button>
       </div>
-
       <div id="drop-zone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
         <input type="file" accept=".txt,.md,.docx,.pdf" onchange="handleFileInput(event)" id="file-input" />
         <div class="drop-zone-icon" id="dz-icon">📄</div>
@@ -1004,23 +597,24 @@ html, body {
         <div class="drop-zone-sub" id="dz-sub">or click to browse</div>
         <div class="drop-zone-formats">.txt · .md · .docx · .pdf</div>
       </div>
-
       <div id="process-status"></div>
-
       <div class="card mt-24">
         <div class="card-title">Ingestion History</div>
         <div id="ingest-history"></div>
       </div>
-
       <div class="card mt-16" style="background: rgba(90,159,212,0.05); border-color: rgba(90,159,212,0.15);">
-        <div class="card-title" style="color:var(--blue)">⚙️ Backend Configuration</div>
-        <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:12px">
-          The ingestion pipeline requires a proxy server to call the Anthropic API.
-          Update <code class="mono" style="background:var(--bg4);padding:2px 6px;border-radius:4px">PROXY_URL</code> at
-          the top of <code class="mono" style="background:var(--bg4);padding:2px 6px;border-radius:4px">index.html</code> with your Railway deployment URL.
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div class="card-title" style="color:var(--blue);margin-bottom:0">⚙️ Backend Status</div>
+          <div id="server-status-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0"></div>
+          <span id="server-status-label" style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace">checking…</span>
+          <button onclick="checkServerStatus()" style="margin-left:4px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);font-size:11px;padding:2px 8px;border-radius:4px;cursor:pointer;font-family:'DM Mono',monospace">↻ refresh</button>
+        </div>
+        <p id="server-status-msg" style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:12px">
+          The server auto-starts at login via macOS launchd. If it shows offline, run:<br>
+          <code class="mono" style="background:var(--bg4);padding:2px 6px;border-radius:4px;font-size:12px">launchctl load ~/Library/LaunchAgents/com.earacademy.ceointel.plist</code>
         </p>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span class="mono" style="font-size:12px;color:var(--text3)">Current PROXY_URL:</span>
+          <span class="mono" style="font-size:12px;color:var(--text3)">Proxy URL:</span>
           <code class="mono" style="font-size:12px;color:var(--accent);background:var(--bg4);padding:3px 8px;border-radius:4px" id="proxy-url-display"></code>
         </div>
       </div>
@@ -1030,55 +624,33 @@ html, body {
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════
-//  CONFIGURATION — Update PROXY_URL after deploying backend to Railway
-// ═══════════════════════════════════════════════════════════════════
-const PROXY_URL = 'YOUR_RAILWAY_URL_HERE';
-// Examples:
-//   Local dev:  'http://localhost:3001'
-//   Railway:    'https://your-app-name.up.railway.app'
-// ═══════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+//  CONFIG — update after deploying backend
+// ══════════════════════════════════════════════════════
+const PROXY_URL = 'http://localhost:3001';
 
-// pdf.js worker
+// ── pdf.js ──
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
-// ── Storage ───────────────────────────────────────────────────────
-const STORAGE_KEY = 'ear_academy_ceo_v2';
+// ── Storage ──
+const STORAGE_KEY = 'ear_academy_ceo_v3';
 
 function loadState() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
-  } catch { return null; }
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null; }
+  catch { return null; }
 }
-
-function saveState(state) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
+function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
 function getState() { return window._state; }
+function setState(s) { window._state = s; saveState(s); renderCurrentSection(); updateSidebarBadges(); }
+function updateState(fn) { const s = getState(); fn(s); setState(s); }
 
-function setState(newState) {
-  window._state = newState;
-  saveState(newState);
-  renderCurrentSection();
-}
-
-function updateState(fn) {
-  const s = getState();
-  fn(s);
-  setState(s);
-}
-
-// ── Seed Data ────────────────────────────────────────────────────
+// ── Seed ──
 const SEED = {
   meetings: [
     {
-      id: 'm1',
-      party: 'Lisa Jane Mitchell — ESASA Music Teacher',
-      type: 'Advisory',
-      date: '2026-01-30',
+      id: 'm1', party: 'Lisa Jane Mitchell — ESASA Music Teacher', type: 'Advisory', date: '2026-01-30',
       context: 'Advisory session with a practising ESASA music teacher to validate product-market fit for SA schools.',
       insights: [
         '"File Control" is a universal admin requirement across ESASA schools — year plans, term plans, lesson plans required for HOD inspection',
@@ -1098,14 +670,10 @@ const SEED = {
         'High school instrumental programme (Lisa hasn\'t reviewed yet)',
         'CAPS alignment could unlock public school market',
       ],
-      tasks: [],
-      rawNotes: 'Seeded meeting — Lisa Jane Mitchell advisory session',
+      tasks: [], rawNotes: 'Seeded meeting — Lisa Jane Mitchell advisory session',
     },
     {
-      id: 'm2',
-      party: 'Email Strategy Review (Internal)',
-      type: 'Advisory',
-      date: '2026-02-02',
+      id: 'm2', party: 'Email Strategy Review (Internal)', type: 'Advisory', date: '2026-02-02',
       context: 'Internal review of outbound email messaging strategy based on Lisa Mitchell feedback.',
       insights: [
         'Conversational, personality-driven emails outperform clinical pain-point messaging',
@@ -1118,24 +686,29 @@ const SEED = {
         'Three email variants ready to A/B test',
         'Validated formula: [Admin burden lifted] + [Abundant resources] + [Total flexibility] = Teacher happiness',
       ],
-      tasks: [],
-      rawNotes: 'Seeded meeting — internal email strategy review',
+      tasks: [], rawNotes: 'Seeded meeting — internal email strategy review',
     },
   ],
   tasks: [
-    { id: 't1', title: 'Send updated long-term plan to Lisa with SA grade nomenclature', priority: 'urgent', done: true, category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Critical for Feb 5 cluster meeting prep' },
-    { id: 't2', title: 'Prepare business cards for cluster meeting', priority: 'urgent', done: true, category: 'ops', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: '19 music teachers attending' },
-    { id: 't3', title: 'Finalise Feb 5 presentation (19 teachers)', priority: 'urgent', done: true, category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Key conversion event' },
-    { id: 't4', title: 'Review Grade R content alignment with SA curriculum', priority: 'high', done: false, category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'CAPS alignment required for public schools' },
-    { id: 't5', title: 'Create assessment materials roadmap', priority: 'high', done: false, category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Confirmed deal-breaker gap — needs timeline' },
-    { id: 't6', title: 'Develop pricing framework for personalised school quotes', priority: 'high', done: false, category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Special pricing sets awkward precedent' },
-    { id: 't7', title: 'Schedule instrumental programme demo with Lisa', priority: 'medium', done: false, category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Lisa hasn\'t seen high school content yet' },
-    { id: 't8', title: 'Begin SA product simplification project', priority: 'medium', done: false, category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: '"Too much content" perception risk' },
-    { id: 't9', title: 'Research CAPS curriculum requirements', priority: 'medium', done: false, category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Required to unlock public school market' },
-    { id: 't10', title: 'Update outbound email templates with hybrid approach', priority: 'high', done: true, category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'Personality + file control messaging' },
-    { id: 't11', title: 'A/B test email versions across school segments', priority: 'medium', done: false, category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'Three variants ready' },
-    { id: 't12', title: 'Track outbound metrics: open rate target 35-45%, reply rate 8-12%', priority: 'medium', done: false, category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'Baseline measurement needed' },
-    { id: 't13', title: 'Build follow-up sequence after intro email', priority: 'medium', done: false, category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'No nurture sequence exists yet' },
+    // Rus's tasks
+    { id: 't1', title: 'Send updated long-term plan to Lisa with SA grade nomenclature', priority: 'urgent', done: true, status: 'done', owner: 'Rus', category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Critical for Feb 5 cluster meeting prep' },
+    { id: 't2', title: 'Prepare business cards for cluster meeting', priority: 'urgent', done: true, status: 'done', owner: 'Rus', category: 'ops', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: '19 music teachers attending' },
+    { id: 't3', title: 'Finalise Feb 5 presentation (19 teachers)', priority: 'urgent', done: true, status: 'done', owner: 'Rus', category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Key conversion event' },
+    { id: 't4', title: 'Review Grade R content alignment with SA curriculum', priority: 'high', done: false, status: 'todo', owner: 'Rus', category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'CAPS alignment required for public schools' },
+    { id: 't5', title: 'Create assessment materials roadmap', priority: 'high', done: false, status: 'todo', owner: 'Rus', category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Confirmed deal-breaker gap — needs timeline' },
+    { id: 't6', title: 'Develop pricing framework for personalised school quotes', priority: 'high', done: false, status: 'todo', owner: 'Rus', category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Special pricing sets awkward precedent' },
+    { id: 't7', title: 'Schedule instrumental programme demo with Lisa', priority: 'medium', done: false, status: 'todo', owner: 'Rus', category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Lisa hasn\'t seen high school content yet' },
+    { id: 't8', title: 'Begin SA product simplification project', priority: 'medium', done: false, status: 'todo', owner: 'Rus', category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: '"Too much content" perception risk' },
+    { id: 't9', title: 'Research CAPS curriculum requirements', priority: 'medium', done: false, status: 'todo', owner: 'Rus', category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Required to unlock public school market' },
+    { id: 't10', title: 'Update outbound email templates with hybrid approach', priority: 'high', done: true, status: 'done', owner: 'Rus', category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'Personality + file control messaging' },
+    { id: 't11', title: 'A/B test email versions across school segments', priority: 'medium', done: false, status: 'todo', owner: 'Rus', category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'Three variants ready' },
+    { id: 't12', title: 'Track outbound metrics: open rate target 35-45%, reply rate 8-12%', priority: 'medium', done: false, status: 'todo', owner: 'Rus', category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'Baseline measurement needed' },
+    { id: 't13', title: 'Build follow-up sequence after intro email', priority: 'medium', done: false, status: 'todo', owner: 'Rus', category: 'sales', source: 'Email Strategy Review', meetingId: 'm2', date: '2026-02-02', notes: 'No nurture sequence exists yet' },
+    // Team tasks
+    { id: 't14', title: 'Share Q4 pilot data and teacher feedback from cluster meeting', priority: 'high', done: false, status: 'in-progress', owner: 'Lisa Mitchell', category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: '' },
+    { id: 't15', title: 'Provide list of ESASA schools with active music programs for targeting', priority: 'medium', done: false, status: 'todo', owner: 'Lisa Mitchell', category: 'sales', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: '' },
+    { id: 't16', title: 'Produce Grade R worksheet templates aligned to Teddy Bears Picnic unit', priority: 'high', done: false, status: 'stuck', owner: 'Content Team', category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: 'Blocked on curriculum spec confirmation from Rus' },
+    { id: 't17', title: 'Build assessment worksheet pack with HOD-ready marking rubric', priority: 'high', done: false, status: 'in-progress', owner: 'Content Team', category: 'product', source: 'Lisa Jane Mitchell', meetingId: 'm1', date: '2026-01-30', notes: '' },
   ],
   objectives: [
     { id: 'o1', name: 'Close 10 SA school subscriptions in Q1', desc: 'Cluster meeting Feb 5 is first conversion opportunity', pct: 5 },
@@ -1160,32 +733,88 @@ const SEED = {
     'Platform perceived as "UK-first" by SA teachers',
     'Special pricing for Lisa sets awkward precedent',
   ],
+  teamMembers: ['Brandon', 'Ciara', 'Jax', 'Kerry', 'Lisa Mitchell', 'Content Team'],
 };
 
-// ── Initialise ───────────────────────────────────────────────────
+// ── Init ──
 function init() {
-  const stored = loadState();
+  // Try v3 first, then migrate from v2
+  let stored = loadState();
+  if (!stored) {
+    const old = (() => { try { return JSON.parse(localStorage.getItem('ear_academy_ceo_v2')); } catch { return null; } })();
+    if (old) {
+      // Migrate
+      stored = { ...old };
+      stored.tasks = (stored.tasks || []).map(t => ({
+        ...t,
+        owner: t.owner || 'Rus',
+        status: t.status || (t.done ? 'done' : 'todo'),
+      }));
+      stored.teamMembers = stored.teamMembers || ['Brandon', 'Ciara', 'Jax', 'Kerry', 'Lisa Mitchell', 'Content Team'];
+    }
+  }
+
   window._state = stored || JSON.parse(JSON.stringify(SEED));
+
+  // Ensure teamMembers always exists
+  if (!window._state.teamMembers) window._state.teamMembers = ['Brandon', 'Ciara', 'Jax', 'Kerry', 'Lisa Mitchell', 'Content Team'];
+  // Patch any tasks missing owner/status
+  window._state.tasks = (window._state.tasks || []).map(t => ({
+    ...t,
+    owner: t.owner || 'Rus',
+    status: t.status || (t.done ? 'done' : 'todo'),
+  }));
+
   window._taskFilter = 'all';
+  window._memberFilter = 'all';
+  window._statusFilter = 'all';
   window._currentSection = 'dashboard';
+  window._stuckDismissed = false;
 
   document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-ZA', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
   document.getElementById('proxy-url-display').textContent = PROXY_URL;
 
   if (!stored) saveState(window._state);
-
+  updateOwnerDropdown();
+  updateSidebarBadges();
   renderCurrentSection();
+  checkServerStatus();
 }
 
-// ── Navigation ────────────────────────────────────────────────────
+// ── Server status check ──
+async function checkServerStatus() {
+  const dot = document.getElementById('server-status-dot');
+  const label = document.getElementById('server-status-label');
+  const msg = document.getElementById('server-status-msg');
+  if (!dot) return;
+  dot.style.background = 'var(--text3)';
+  label.textContent = 'checking…';
+  label.style.color = 'var(--text3)';
+  try {
+    const res = await fetch(`${PROXY_URL}/health`, { signal: AbortSignal.timeout(4000) });
+    if (res.ok) {
+      dot.style.background = 'var(--green)';
+      dot.style.boxShadow = '0 0 6px var(--green)';
+      label.textContent = 'online';
+      label.style.color = 'var(--green)';
+      msg.innerHTML = 'Server is running. Drop a file above to process it.';
+    } else {
+      throw new Error('non-ok');
+    }
+  } catch {
+    dot.style.background = 'var(--red)';
+    dot.style.boxShadow = '0 0 6px var(--red)';
+    label.textContent = 'offline';
+    label.style.color = 'var(--red)';
+    msg.innerHTML = 'Server not reachable. Restart it in Terminal:<br><code class="mono" style="background:var(--bg4);padding:2px 6px;border-radius:4px;font-size:12px">launchctl unload ~/Library/LaunchAgents/com.earacademy.ceointel.plist && launchctl load ~/Library/LaunchAgents/com.earacademy.ceointel.plist</code>';
+  }
+}
+
+// ── Navigation ──
 function navigate(section) {
   window._currentSection = section;
-  document.querySelectorAll('.nav-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.section === section);
-  });
-  document.querySelectorAll('section[id^="section-"]').forEach(el => {
-    el.classList.toggle('hidden', el.id !== 'section-' + section);
-  });
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.section === section));
+  document.querySelectorAll('section[id^="section-"]').forEach(el => el.classList.toggle('hidden', el.id !== 'section-' + section));
   closeSidebar();
   renderCurrentSection();
 }
@@ -1194,30 +823,51 @@ function renderCurrentSection() {
   const s = window._currentSection;
   if (s === 'dashboard') renderDashboard();
   else if (s === 'actions') renderActions();
+  else if (s === 'teamtasks') renderTeamTasks();
   else if (s === 'meetings') renderMeetings();
   else if (s === 'intel') renderIntel();
   else if (s === 'objectives') renderObjectives();
+  else if (s === 'team') renderTeam();
   else if (s === 'ingest') renderIngest();
 }
 
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
+
+// ── Sidebar badges ──
+function updateSidebarBadges() {
+  const state = getState();
+  const tasks = state.tasks || [];
+
+  const urgentCount = tasks.filter(t => t.owner === 'Rus' && !t.done && t.priority === 'urgent').length;
+  const urgentBadge = document.getElementById('badge-urgent');
+  if (urgentCount > 0) { urgentBadge.textContent = urgentCount; urgentBadge.classList.remove('hidden'); }
+  else { urgentBadge.classList.add('hidden'); }
+
+  const stuckCount = tasks.filter(t => t.owner !== 'Rus' && t.status === 'stuck').length;
+  const stuckBadge = document.getElementById('badge-stuck');
+  if (stuckCount > 0) { stuckBadge.textContent = stuckCount; stuckBadge.classList.remove('hidden'); }
+  else { stuckBadge.classList.add('hidden'); }
+
+  const memberCount = (state.teamMembers || []).length;
+  document.getElementById('badge-members').textContent = memberCount;
 }
 
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
+// ── Owner dropdown (Add Task form) ──
+function updateOwnerDropdown() {
+  const sel = document.getElementById('new-task-owner');
+  if (!sel) return;
+  const members = getState().teamMembers || [];
+  sel.innerHTML = `<option value="Rus">Me (Rus)</option>` +
+    members.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
 }
 
-// ── Helpers ───────────────────────────────────────────────────────
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-}
+// ── Helpers ──
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function priorityOrder(p) { return p === 'urgent' ? 0 : p === 'high' ? 1 : 2; }
+function statusOrder(s) { return s === 'stuck' ? 0 : s === 'in-progress' ? 1 : s === 'todo' ? 2 : 3; }
 
-function priorityOrder(p) {
-  return p === 'urgent' ? 0 : p === 'high' ? 1 : 2;
-}
-
-function sortTasks(tasks) {
+function sortMyTasks(tasks) {
   return [...tasks].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
     if (priorityOrder(a.priority) !== priorityOrder(b.priority)) return priorityOrder(a.priority) - priorityOrder(b.priority);
@@ -1225,15 +875,23 @@ function sortTasks(tasks) {
   });
 }
 
+function sortTeamTasks(tasks) {
+  return [...tasks].sort((a, b) => {
+    if (statusOrder(a.status) !== statusOrder(b.status)) return statusOrder(a.status) - statusOrder(b.status);
+    return (b.date || '').localeCompare(a.date || '');
+  });
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function typeBadge(type) {
   if (!type) return '';
   const t = type.toLowerCase();
-  if (t === 'customer') return '<span class="badge badge-customer">Customer</span>';
-  if (t === 'investor') return '<span class="badge badge-investor">Investor</span>';
-  if (t === 'partner') return '<span class="badge badge-partner">Partner</span>';
-  if (t === 'advisory') return '<span class="badge badge-advisory">Advisory</span>';
-  if (t === 'sales') return '<span class="badge badge-sales">Sales</span>';
-  return `<span class="badge badge-general">${type}</span>`;
+  const map = { customer:'badge-customer', investor:'badge-investor', partner:'badge-partner', advisory:'badge-advisory', sales:'badge-sales' };
+  return `<span class="badge ${map[t] || 'badge-general'}">${esc(type)}</span>`;
 }
 
 function priorityBadge(p) {
@@ -1243,25 +901,21 @@ function priorityBadge(p) {
 }
 
 function categoryBadge(c) {
-  if (c === 'sales') return '<span class="badge badge-sales">Sales</span>';
-  if (c === 'product') return '<span class="badge badge-product">Product</span>';
-  if (c === 'ops') return '<span class="badge badge-ops">Ops</span>';
-  return '<span class="badge badge-general">General</span>';
+  const map = { sales:'badge-sales', product:'badge-product', ops:'badge-ops' };
+  return `<span class="badge ${map[c] || 'badge-general'}">${esc(c || 'general')}</span>`;
 }
 
-function progressClass(pct) {
-  if (pct >= 70) return 'progress-green';
-  if (pct >= 30) return 'progress-amber';
-  return 'progress-red';
+function statusPillHtml(task) {
+  const labels = { 'todo': 'To Do', 'in-progress': '● In Progress', 'stuck': '⚠ Stuck', 'done': '✓ Done' };
+  const cls = { 'todo': 'status-todo', 'in-progress': 'status-in-progress', 'stuck': 'status-stuck', 'done': 'status-done' };
+  const s = task.status || 'todo';
+  return `<button class="status-pill ${cls[s]}" onclick="cycleStatus('${task.id}')" title="Click to update status">${labels[s] || s}</button>`;
 }
 
-function progressColor(pct) {
-  if (pct >= 70) return 'var(--green)';
-  if (pct >= 30) return 'var(--accent)';
-  return 'var(--red)';
-}
+function progressClass(pct) { return pct >= 70 ? 'progress-green' : pct >= 30 ? 'progress-amber' : 'progress-red'; }
+function progressColor(pct) { return pct >= 70 ? 'var(--green)' : pct >= 30 ? 'var(--accent)' : 'var(--red)'; }
 
-function taskItemHtml(task, compact = false) {
+function myTaskHtml(task, compact = false) {
   return `
     <div class="task-item" id="task-${task.id}">
       <div class="task-checkbox ${task.done ? 'checked' : ''}" onclick="toggleTask('${task.id}')"></div>
@@ -1273,31 +927,57 @@ function taskItemHtml(task, compact = false) {
           ${task.source ? `<span class="task-source">${esc(task.source)}</span>` : ''}
           ${task.date ? `<span class="task-source">${task.date}</span>` : ''}
         </div>
-        ${task.notes && !compact ? `<div class="task-source mt-4" style="color:var(--text3)">${esc(task.notes)}</div>` : ''}
+        ${task.notes && !compact ? `<div class="task-source" style="margin-top:3px;color:var(--text3)">${esc(task.notes)}</div>` : ''}
       </div>
-      <button class="btn btn-icon btn-danger" onclick="deleteTask('${task.id}')" title="Delete task" style="opacity:0.5;flex-shrink:0">✕</button>
+      <button class="btn btn-icon btn-danger" onclick="deleteTask('${task.id}')" style="opacity:0.4;flex-shrink:0" title="Delete">✕</button>
     </div>`;
 }
 
-function esc(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function teamTaskHtml(task) {
+  const state = getState();
+  const allMembers = ['Rus', ...(state.teamMembers || []), 'Unassigned'];
+  const reassignOptions = allMembers.filter(m => m !== task.owner)
+    .map(m => `<option value="${esc(m)}">${esc(m === 'Rus' ? 'Rus (My Tasks)' : m)}</option>`).join('');
+  const isStuck = task.status === 'stuck';
+  const isDone = task.status === 'done';
+  return `
+    <div class="team-task-item ${isStuck ? 'stuck' : ''}" id="task-${task.id}">
+      <div class="team-task-main">
+        <div class="team-task-title ${isDone ? 'done' : ''}">${esc(task.title)}</div>
+        <div class="task-meta" style="margin-top:4px">
+          ${categoryBadge(task.category)}
+          <span class="task-source">${esc(task.owner)}</span>
+          ${task.source ? `<span class="task-source">· ${esc(task.source)}</span>` : ''}
+          ${task.date ? `<span class="task-source">· ${task.date}</span>` : ''}
+        </div>
+        ${task.notes ? `<div class="task-source" style="margin-top:3px;color:var(--text3)">${esc(task.notes)}</div>` : ''}
+      </div>
+      <div class="team-task-actions">
+        ${statusPillHtml(task)}
+        <select class="reassign-select" onchange="reassignTask('${task.id}', this.value)" title="Reassign task">
+          <option value="">Reassign ▾</option>
+          ${reassignOptions}
+        </select>
+        <button class="btn btn-icon btn-danger btn-sm" onclick="deleteTask('${task.id}')" style="opacity:0.4" title="Delete">✕</button>
+      </div>
+    </div>`;
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────
+// ── Dashboard ──
 function renderDashboard() {
   const state = getState();
   const tasks = state.tasks || [];
   const meetings = state.meetings || [];
   const objectives = state.objectives || [];
+  const myTasks = tasks.filter(t => t.owner === 'Rus');
+  const myOpen = myTasks.filter(t => !t.done);
+  const myDone = myTasks.filter(t => t.done);
+  const teamTasks = tasks.filter(t => t.owner !== 'Rus');
+  const teamOpen = teamTasks.filter(t => t.status !== 'done');
+  const stuck = teamTasks.filter(t => t.status === 'stuck');
+  const rate = myTasks.length ? Math.round((myDone.length / myTasks.length) * 100) : 0;
 
-  const open = tasks.filter(t => !t.done);
-  const done = tasks.filter(t => t.done);
-  const urgent = open.filter(t => t.priority === 'urgent');
-  const high = open.filter(t => t.priority === 'high');
-  const rate = tasks.length ? Math.round((done.length / tasks.length) * 100) : 0;
-
-  document.getElementById('dash-subtitle').textContent = `${meetings.length} meetings · ${open.length} open tasks · ${objectives.length} objectives`;
+  document.getElementById('dash-subtitle').textContent = `${meetings.length} meetings · ${myOpen.length} my open tasks · ${teamOpen.length} team tasks`;
 
   document.getElementById('stat-grid').innerHTML = `
     <div class="stat-card">
@@ -1306,34 +986,37 @@ function renderDashboard() {
       <div class="stat-sub">processed by AI</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Open Actions</div>
-      <div class="stat-value" style="color:${open.length > 10 ? 'var(--red)' : 'var(--text)'}">${open.length}</div>
-      <div class="stat-sub">${urgent.length} urgent · ${high.length} high</div>
+      <div class="stat-label">My Open Tasks</div>
+      <div class="stat-value" style="color:${myOpen.filter(t=>t.priority==='urgent').length ? 'var(--red)' : 'var(--text)'}">${myOpen.length}</div>
+      <div class="stat-sub">${myOpen.filter(t=>t.priority==='urgent').length} urgent · ${myOpen.filter(t=>t.priority==='high').length} high</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Completed</div>
-      <div class="stat-value" style="color:var(--green)">${done.length}</div>
-      <div class="stat-sub">of ${tasks.length} total</div>
+      <div class="stat-label">Team Tasks</div>
+      <div class="stat-value" style="color:${stuck.length ? 'var(--red)' : 'var(--text)'}">${teamOpen.length}</div>
+      <div class="stat-sub">${stuck.length ? `<span style="color:var(--red)">${stuck.length} stuck</span>` : 'all clear'}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Completion Rate</div>
+      <div class="stat-label">My Completion</div>
       <div class="stat-value" style="color:${rate >= 60 ? 'var(--green)' : rate >= 30 ? 'var(--accent)' : 'var(--red)'}">${rate}%</div>
-      <div class="stat-sub">all time</div>
+      <div class="stat-sub">${myDone.length} of ${myTasks.length} done</div>
     </div>
   `;
 
+  // Urgent (my tasks only)
   const urgentEl = document.getElementById('urgent-list');
-  const urgentTasks = sortTasks(open.filter(t => t.priority === 'urgent'));
+  const urgentTasks = sortMyTasks(myOpen.filter(t => t.priority === 'urgent'));
   urgentEl.innerHTML = urgentTasks.length
-    ? urgentTasks.map(t => taskItemHtml(t, true)).join('')
+    ? urgentTasks.map(t => myTaskHtml(t, true)).join('')
     : '<div class="empty-state"><div class="empty-icon">✓</div>No urgent tasks</div>';
 
+  // High (my tasks only)
   const highEl = document.getElementById('high-list');
-  const highTasks = sortTasks(open.filter(t => t.priority === 'high'));
+  const highTasks = sortMyTasks(myOpen.filter(t => t.priority === 'high'));
   highEl.innerHTML = highTasks.length
-    ? highTasks.map(t => taskItemHtml(t, true)).join('')
+    ? highTasks.map(t => myTaskHtml(t, true)).join('')
     : '<div class="empty-state"><div class="empty-icon">✓</div>No high-priority tasks</div>';
 
+  // Recent meetings
   const recentEl = document.getElementById('recent-meetings');
   const recentMeetings = [...meetings].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 4);
   recentEl.innerHTML = recentMeetings.length
@@ -1349,6 +1032,31 @@ function renderDashboard() {
         </div>`).join('')
     : '<div class="empty-state"><div class="empty-icon">◎</div>No meetings yet</div>';
 
+  // Team Pulse
+  const pulseEl = document.getElementById('team-pulse');
+  const members = state.teamMembers || [];
+  if (members.length) {
+    const stuckHtml = stuck.length
+      ? `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(224,90,75,0.08);border:1px solid rgba(224,90,75,0.15);border-radius:7px;margin-bottom:12px">
+           <span style="font-size:12px;color:var(--red);font-weight:600">⚠ ${stuck.length} task${stuck.length > 1 ? 's' : ''} stuck</span>
+           <button class="link-btn" onclick="navigate('teamtasks')">View →</button>
+         </div>`
+      : `<div style="padding:8px 10px;background:rgba(76,175,125,0.08);border:1px solid rgba(76,175,125,0.15);border-radius:7px;margin-bottom:12px;font-size:12px;color:var(--green)">✓ All clear — no blockers</div>`;
+
+    const rows = members.map(m => {
+      const mOpen = tasks.filter(t => t.owner === m && t.status !== 'done').length;
+      const mStuck = tasks.filter(t => t.owner === m && t.status === 'stuck').length;
+      return `<div class="pulse-row">
+        <span class="pulse-member">● ${esc(m)}</span>
+        <span class="pulse-count">${mOpen} open${mStuck ? ` · <span style="color:var(--red)">${mStuck} stuck</span>` : ''}</span>
+      </div>`;
+    }).join('');
+    pulseEl.innerHTML = stuckHtml + rows;
+  } else {
+    pulseEl.innerHTML = '<div class="empty-state" style="padding:16px">No team members yet — <button class="link-btn" onclick="navigate(\'team\')">add your team</button></div>';
+  }
+
+  // Objectives
   const objEl = document.getElementById('dash-objectives');
   objEl.innerHTML = objectives.length
     ? objectives.map(o => `
@@ -1364,487 +1072,405 @@ function renderDashboard() {
     : '<div class="empty-state"><div class="empty-icon">◎</div>No objectives set</div>';
 }
 
-// ── Actions ───────────────────────────────────────────────────────
+// ── My Tasks ──
 function setTaskFilter(filter) {
   window._taskFilter = filter;
-  document.querySelectorAll('.filter-tab').forEach(el => {
-    el.classList.toggle('active', el.dataset.filter === filter);
-  });
+  document.querySelectorAll('.filter-tab[data-filter]').forEach(el => el.classList.toggle('active', el.dataset.filter === filter));
   renderActions();
 }
 
 function renderActions() {
   const state = getState();
-  let tasks = state.tasks || [];
+  const myTasks = (state.tasks || []).filter(t => t.owner === 'Rus');
   const filter = window._taskFilter || 'all';
-
   let filtered;
-  if (filter === 'all') filtered = sortTasks(tasks);
-  else if (filter === 'completed') filtered = sortTasks(tasks.filter(t => t.done));
-  else if (['urgent','high','medium'].includes(filter)) filtered = sortTasks(tasks.filter(t => t.priority === filter && !t.done));
-  else filtered = sortTasks(tasks.filter(t => t.category === filter));
+  if (filter === 'all') filtered = sortMyTasks(myTasks);
+  else if (filter === 'completed') filtered = sortMyTasks(myTasks.filter(t => t.done));
+  else if (['urgent','high','medium'].includes(filter)) filtered = sortMyTasks(myTasks.filter(t => t.priority === filter && !t.done));
+  else filtered = sortMyTasks(myTasks.filter(t => t.category === filter));
 
-  const open = tasks.filter(t => !t.done).length;
-  document.getElementById('actions-subtitle').textContent = `${open} open · ${tasks.filter(t=>t.done).length} completed`;
+  const open = myTasks.filter(t => !t.done).length;
+  document.getElementById('actions-subtitle').textContent = `${open} open · ${myTasks.filter(t=>t.done).length} completed`;
 
-  const el = document.getElementById('tasks-list');
-  el.innerHTML = filtered.length
-    ? filtered.map(t => taskItemHtml(t)).join('')
+  document.getElementById('tasks-list').innerHTML = filtered.length
+    ? filtered.map(t => myTaskHtml(t)).join('')
     : '<div class="empty-state"><div class="empty-icon">✓</div>No tasks match this filter</div>';
 }
 
 function toggleTask(id) {
   updateState(s => {
     const t = s.tasks.find(x => x.id === id);
-    if (t) t.done = !t.done;
+    if (t) { t.done = !t.done; t.status = t.done ? 'done' : 'todo'; }
   });
 }
 
 function deleteTask(id) {
-  updateState(s => {
-    s.tasks = s.tasks.filter(x => x.id !== id);
-  });
+  updateState(s => { s.tasks = s.tasks.filter(x => x.id !== id); });
 }
 
 function addTaskManually() {
   const title = document.getElementById('new-task-title').value.trim();
   if (!title) return;
+  const owner = document.getElementById('new-task-owner').value || 'Rus';
   const priority = document.getElementById('new-task-priority').value;
   const category = document.getElementById('new-task-category').value;
   const notes = document.getElementById('new-task-notes').value.trim();
   updateState(s => {
-    s.tasks.push({
-      id: uid(), title, priority, done: false, category,
-      source: 'Manual', meetingId: null,
-      date: new Date().toISOString().slice(0, 10), notes,
-    });
+    s.tasks.push({ id: uid(), title, priority, done: false, status: 'todo', owner, category, source: 'Manual', meetingId: null, date: new Date().toISOString().slice(0, 10), notes });
   });
   document.getElementById('new-task-title').value = '';
   document.getElementById('new-task-notes').value = '';
+  document.getElementById('new-task-owner').value = 'Rus';
 }
 
-// ── Meetings ──────────────────────────────────────────────────────
+// ── Team Tasks ──
+function setMemberFilter(member) {
+  window._memberFilter = member;
+  document.querySelectorAll('.member-tab').forEach(el => el.classList.toggle('active', el.dataset.member === member));
+  renderTeamTasksList();
+}
+
+function setStatusFilter(status) {
+  window._statusFilter = status;
+  document.querySelectorAll('.filter-tab[data-status]').forEach(el => el.classList.toggle('active', el.dataset.status === status));
+  renderTeamTasksList();
+}
+
+function renderTeamTasks() {
+  const state = getState();
+  const teamTasks = (state.tasks || []).filter(t => t.owner !== 'Rus');
+  const stuck = teamTasks.filter(t => t.status === 'stuck');
+  const open = teamTasks.filter(t => t.status !== 'done');
+
+  document.getElementById('teamtasks-subtitle').textContent = `${open.length} open · ${stuck.length} stuck`;
+
+  // Stuck banner
+  const bannerEl = document.getElementById('stuck-banner');
+  if (stuck.length && !window._stuckDismissed) {
+    bannerEl.innerHTML = `
+      <div class="stuck-banner">
+        <div class="stuck-banner-icon">⚠️</div>
+        <div class="stuck-banner-body">
+          <div class="stuck-banner-title">Needs your attention — ${stuck.length} task${stuck.length > 1 ? 's' : ''} stuck</div>
+          <div class="stuck-banner-items">${stuck.map(t => `<b>${esc(t.owner)}</b>: ${esc(t.title)}`).join(' · ')}</div>
+        </div>
+        <button class="stuck-banner-dismiss" onclick="window._stuckDismissed=true;document.getElementById('stuck-banner').innerHTML=''" title="Dismiss">✕</button>
+      </div>`;
+  } else if (!stuck.length) {
+    bannerEl.innerHTML = '';
+    window._stuckDismissed = false;
+  }
+
+  // Member tabs
+  const members = [...new Set(teamTasks.map(t => t.owner))];
+  const tabsEl = document.getElementById('member-tabs');
+  const allCount = open.length;
+  const allStuck = stuck.length;
+  tabsEl.innerHTML = `
+    <button class="member-tab ${window._memberFilter === 'all' ? 'active' : ''}" data-member="all" onclick="setMemberFilter('all')">
+      All Team <span class="member-tab-count ${allStuck ? 'urgent' : ''}">${allCount}</span>
+    </button>
+    ${members.map(m => {
+      const mOpen = teamTasks.filter(t => t.owner === m && t.status !== 'done').length;
+      const mStuck = teamTasks.filter(t => t.owner === m && t.status === 'stuck').length;
+      return `<button class="member-tab ${window._memberFilter === m ? 'active' : ''}" data-member="${esc(m)}" onclick="setMemberFilter('${esc(m)}')">
+        ${esc(m)} <span class="member-tab-count ${mStuck ? 'urgent' : ''}">${mOpen}</span>
+      </button>`;
+    }).join('')}`;
+
+  renderTeamTasksList();
+}
+
+function renderTeamTasksList() {
+  const state = getState();
+  const member = window._memberFilter || 'all';
+  const statusF = window._statusFilter || 'all';
+
+  let tasks = (state.tasks || []).filter(t => t.owner !== 'Rus');
+  if (member !== 'all') tasks = tasks.filter(t => t.owner === member);
+  if (statusF !== 'all') tasks = tasks.filter(t => t.status === statusF);
+  tasks = sortTeamTasks(tasks);
+
+  document.getElementById('team-tasks-list').innerHTML = tasks.length
+    ? tasks.map(t => teamTaskHtml(t)).join('')
+    : '<div class="empty-state"><div class="empty-icon">◈</div>No team tasks match this filter</div>';
+}
+
+function cycleStatus(id) {
+  const cycle = { 'todo': 'in-progress', 'in-progress': 'stuck', 'stuck': 'done', 'done': 'todo' };
+  updateState(s => {
+    const t = s.tasks.find(x => x.id === id);
+    if (t) { t.status = cycle[t.status] || 'todo'; t.done = t.status === 'done'; }
+  });
+  window._stuckDismissed = false;
+}
+
+function reassignTask(id, newOwner) {
+  if (!newOwner) return;
+  updateState(s => {
+    const t = s.tasks.find(x => x.id === id);
+    if (t) t.owner = newOwner;
+  });
+}
+
+// ── Team Management ──
+function renderTeam() {
+  const state = getState();
+  const members = state.teamMembers || [];
+  const tasks = state.tasks || [];
+  const maxOpen = Math.max(1, ...members.map(m => tasks.filter(t => t.owner === m && t.status !== 'done').length));
+
+  document.getElementById('team-subtitle').textContent = `${members.length} team member${members.length !== 1 ? 's' : ''}`;
+
+  const el = document.getElementById('team-members-list');
+  if (!members.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">◎</div>No team members yet — add one above</div>';
+    return;
+  }
+
+  el.innerHTML = members.map(m => {
+    const open = tasks.filter(t => t.owner === m && t.status !== 'done').length;
+    const stuckCount = tasks.filter(t => t.owner === m && t.status === 'stuck').length;
+    const barWidth = Math.round((open / maxOpen) * 100);
+    const initials = m.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    return `
+      <div class="team-member-row">
+        <div class="member-avatar">${initials}</div>
+        <div class="member-name" style="cursor:pointer" onclick="setMemberFilter('${esc(m)}');navigate('teamtasks')">${esc(m)}</div>
+        <div class="member-workload">
+          <div class="workload-bar-wrap"><div class="workload-bar-fill" style="width:${barWidth}%"></div></div>
+          <span class="workload-label">${open} open${stuckCount ? ` · <span class="workload-stuck">${stuckCount} stuck</span>` : ''}</span>
+        </div>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="removeTeamMember('${esc(m)}')" title="Remove ${esc(m)}" style="opacity:0.5">✕</button>
+      </div>`;
+  }).join('');
+}
+
+function addTeamMember() {
+  const name = document.getElementById('new-member-name').value.trim();
+  if (!name) return;
+  updateState(s => {
+    if (!s.teamMembers) s.teamMembers = [];
+    if (!s.teamMembers.includes(name)) s.teamMembers.push(name);
+  });
+  document.getElementById('new-member-name').value = '';
+  updateOwnerDropdown();
+}
+
+function removeTeamMember(name) {
+  if (!confirm(`Remove ${name} from the team? Their tasks will be reassigned to Unassigned.`)) return;
+  updateState(s => {
+    s.teamMembers = (s.teamMembers || []).filter(m => m !== name);
+    s.tasks = (s.tasks || []).map(t => t.owner === name ? { ...t, owner: 'Unassigned' } : t);
+  });
+  updateOwnerDropdown();
+}
+
+// ── Meetings ──
 function renderMeetings() {
   const state = getState();
   const meetings = [...(state.meetings || [])].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   document.getElementById('meetings-subtitle').textContent = `${meetings.length} meetings processed`;
-
   const el = document.getElementById('meetings-list');
-  if (!meetings.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">◎</div>No meetings yet — drop a file in Ingestion Console</div>';
-    return;
-  }
-
+  if (!meetings.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">◎</div>No meetings yet — drop a file in Ingestion Console</div>'; return; }
   el.innerHTML = meetings.map(m => `
     <div class="meeting-card">
       <div class="meeting-card-header">
-        <div>
-          <div class="meeting-party">${esc(m.party)}</div>
-          <div class="meeting-date">${m.date || ''}</div>
-        </div>
+        <div><div class="meeting-party">${esc(m.party)}</div><div class="meeting-date">${m.date || ''}</div></div>
         <div class="meeting-actions">
           ${typeBadge(m.type)}
-          <button class="btn btn-icon btn-danger btn-sm" onclick="deleteMeeting('${m.id}')" title="Delete meeting">✕</button>
+          <button class="btn btn-icon btn-danger btn-sm" onclick="deleteMeeting('${m.id}')">✕</button>
         </div>
       </div>
       <div class="meeting-context">${esc(m.context)}</div>
-      ${m.insights && m.insights.length ? `
-        <div class="meeting-section-title">Key Insights</div>
-        <ul class="meeting-list">${m.insights.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : ''}
-      ${m.redFlags && m.redFlags.length ? `
-        <div class="meeting-section-title">Red Flags</div>
-        <ul class="meeting-list red">${m.redFlags.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : ''}
-      ${m.opportunities && m.opportunities.length ? `
-        <div class="meeting-section-title">Opportunities</div>
-        <ul class="meeting-list green">${m.opportunities.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : ''}
+      ${m.insights?.length ? `<div class="meeting-section-title">Key Insights</div><ul class="meeting-list">${m.insights.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>` : ''}
+      ${m.redFlags?.length ? `<div class="meeting-section-title">Red Flags</div><ul class="meeting-list red">${m.redFlags.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>` : ''}
+      ${m.opportunities?.length ? `<div class="meeting-section-title">Opportunities</div><ul class="meeting-list green">${m.opportunities.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>` : ''}
     </div>`).join('');
 }
 
 function deleteMeeting(id) {
   if (!confirm('Delete this meeting and all its associated tasks?')) return;
-  updateState(s => {
-    s.meetings = s.meetings.filter(m => m.id !== id);
-    s.tasks = s.tasks.filter(t => t.meetingId !== id);
-  });
+  updateState(s => { s.meetings = s.meetings.filter(m => m.id !== id); s.tasks = s.tasks.filter(t => t.meetingId !== id); });
 }
 
-// ── Business Intel ────────────────────────────────────────────────
+// ── Business Intel ──
 function renderIntel() {
   const state = getState();
-
-  const signalsEl = document.getElementById('intel-signals');
-  signalsEl.innerHTML = (state.signals || []).length
-    ? state.signals.map((s, i) => `
-        <div class="intel-item signal" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-          <span>${esc(s)}</span>
-          <button class="btn btn-icon btn-danger btn-sm" style="flex-shrink:0;opacity:0.5" onclick="deleteSignal(${i})">✕</button>
-        </div>`).join('')
-    : '<div class="empty-state" style="padding:16px">No signals yet</div>';
-
-  const oppsEl = document.getElementById('intel-opps');
-  oppsEl.innerHTML = (state.opportunities || []).length
-    ? state.opportunities.map((o, i) => `
-        <div class="intel-item opportunity" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-          <span>${esc(o)}</span>
-          <button class="btn btn-icon btn-danger btn-sm" style="flex-shrink:0;opacity:0.5" onclick="deleteOpportunity(${i})">✕</button>
-        </div>`).join('')
-    : '<div class="empty-state" style="padding:16px">No opportunities yet</div>';
-
-  const risksEl = document.getElementById('intel-risks');
-  risksEl.innerHTML = (state.risks || []).length
-    ? state.risks.map((r, i) => `
-        <div class="intel-item risk" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-          <span>${esc(r)}</span>
-          <button class="btn btn-icon btn-danger btn-sm" style="flex-shrink:0;opacity:0.5" onclick="deleteRisk(${i})">✕</button>
-        </div>`).join('')
-    : '<div class="empty-state" style="padding:16px">No risks logged</div>';
-
-  const timelineEl = document.getElementById('intel-timeline');
-  const meetings = [...(state.meetings || [])].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-  timelineEl.innerHTML = meetings.length
-    ? meetings.map(m => `
-        <div class="timeline-item">
-          <div class="timeline-dot">◎</div>
-          <div class="timeline-body">
-            <div class="timeline-party">${esc(m.party)}</div>
-            <div class="timeline-meta">${typeBadge(m.type)} <span class="mono">${m.date || ''}</span></div>
-            <div class="timeline-preview">${esc(m.context)}</div>
-          </div>
-        </div>`).join('')
-    : '<div class="empty-state">No meetings in timeline</div>';
+  const sigEl = document.getElementById('intel-signals');
+  sigEl.innerHTML = (state.signals||[]).length ? state.signals.map((s,i) => `<div class="intel-item signal" style="display:flex;justify-content:space-between;gap:8px"><span>${esc(s)}</span><button class="btn btn-icon btn-danger btn-sm" style="opacity:0.5" onclick="deleteSignal(${i})">✕</button></div>`).join('') : '<div class="empty-state" style="padding:16px">No signals yet</div>';
+  const oppEl = document.getElementById('intel-opps');
+  oppEl.innerHTML = (state.opportunities||[]).length ? state.opportunities.map((o,i) => `<div class="intel-item opportunity" style="display:flex;justify-content:space-between;gap:8px"><span>${esc(o)}</span><button class="btn btn-icon btn-danger btn-sm" style="opacity:0.5" onclick="deleteOpportunity(${i})">✕</button></div>`).join('') : '<div class="empty-state" style="padding:16px">No opportunities yet</div>';
+  const riskEl = document.getElementById('intel-risks');
+  riskEl.innerHTML = (state.risks||[]).length ? state.risks.map((r,i) => `<div class="intel-item risk" style="display:flex;justify-content:space-between;gap:8px"><span>${esc(r)}</span><button class="btn btn-icon btn-danger btn-sm" style="opacity:0.5" onclick="deleteRisk(${i})">✕</button></div>`).join('') : '<div class="empty-state" style="padding:16px">No risks logged</div>';
+  const tlEl = document.getElementById('intel-timeline');
+  const meetings = [...(state.meetings||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  tlEl.innerHTML = meetings.length ? meetings.map(m => `<div class="timeline-item"><div class="timeline-dot">◎</div><div class="timeline-body"><div class="timeline-party">${esc(m.party)}</div><div class="timeline-meta">${typeBadge(m.type)} <span class="mono">${m.date||''}</span></div><div class="timeline-preview">${esc(m.context)}</div></div></div>`).join('') : '<div class="empty-state">No meetings in timeline</div>';
 }
 
-function addSignal() {
-  const v = document.getElementById('new-signal-input').value.trim();
-  if (!v) return;
-  updateState(s => { s.signals = [...(s.signals || []), v]; });
-  document.getElementById('new-signal-input').value = '';
-}
+function addSignal() { const v=document.getElementById('new-signal-input').value.trim(); if(!v)return; updateState(s=>{s.signals=[...(s.signals||[]),v];}); document.getElementById('new-signal-input').value=''; }
+function deleteSignal(i) { updateState(s=>{s.signals.splice(i,1);}); }
+function addOpportunity() { const v=document.getElementById('new-opp-input').value.trim(); if(!v)return; updateState(s=>{s.opportunities=[...(s.opportunities||[]),v];}); document.getElementById('new-opp-input').value=''; }
+function deleteOpportunity(i) { updateState(s=>{s.opportunities.splice(i,1);}); }
+function addRisk() { const v=document.getElementById('new-risk-input').value.trim(); if(!v)return; updateState(s=>{s.risks=[...(s.risks||[]),v];}); document.getElementById('new-risk-input').value=''; }
+function deleteRisk(i) { updateState(s=>{s.risks.splice(i,1);}); }
 
-function deleteSignal(i) {
-  updateState(s => { s.signals.splice(i, 1); });
-}
-
-function addOpportunity() {
-  const v = document.getElementById('new-opp-input').value.trim();
-  if (!v) return;
-  updateState(s => { s.opportunities = [...(s.opportunities || []), v]; });
-  document.getElementById('new-opp-input').value = '';
-}
-
-function deleteOpportunity(i) {
-  updateState(s => { s.opportunities.splice(i, 1); });
-}
-
-function addRisk() {
-  const v = document.getElementById('new-risk-input').value.trim();
-  if (!v) return;
-  updateState(s => { s.risks = [...(s.risks || []), v]; });
-  document.getElementById('new-risk-input').value = '';
-}
-
-function deleteRisk(i) {
-  updateState(s => { s.risks.splice(i, 1); });
-}
-
-// ── Objectives ────────────────────────────────────────────────────
+// ── Objectives ──
 function renderObjectives() {
   const state = getState();
   const objectives = state.objectives || [];
-  const avgPct = objectives.length ? Math.round(objectives.reduce((a, o) => a + o.pct, 0) / objectives.length) : 0;
-  document.getElementById('obj-subtitle').textContent = `${objectives.length} objectives · avg ${avgPct}% complete`;
-
-  const el = document.getElementById('objectives-list');
-  el.innerHTML = objectives.length
+  const avg = objectives.length ? Math.round(objectives.reduce((a,o)=>a+o.pct,0)/objectives.length) : 0;
+  document.getElementById('obj-subtitle').textContent = `${objectives.length} objectives · avg ${avg}% complete`;
+  document.getElementById('objectives-list').innerHTML = objectives.length
     ? objectives.map(o => `
         <div class="objective-item">
           <div class="objective-header">
             <div class="objective-name">${esc(o.name)}</div>
             <div style="display:flex;align-items:center;gap:8px">
               <span class="objective-pct" style="color:${progressColor(o.pct)}">${o.pct}%</span>
-              <button class="btn btn-icon btn-sm" onclick="editObjectivePct('${o.id}')" title="Edit progress" style="opacity:0.6">✎</button>
-              <button class="btn btn-icon btn-danger btn-sm" onclick="deleteObjective('${o.id}')" title="Delete" style="opacity:0.5">✕</button>
+              <button class="btn btn-icon btn-sm" onclick="editObjectivePct('${o.id}')" style="opacity:0.6">✎</button>
+              <button class="btn btn-icon btn-danger btn-sm" onclick="deleteObjective('${o.id}')" style="opacity:0.5">✕</button>
             </div>
           </div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar-fill ${progressClass(o.pct)}" style="width:${o.pct}%"></div>
-          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill ${progressClass(o.pct)}" style="width:${o.pct}%"></div></div>
           ${o.desc ? `<div class="objective-evidence">${esc(o.desc)}</div>` : ''}
         </div>`).join('')
-    : '<div class="empty-state"><div class="empty-icon">◎</div>No objectives yet — add one above</div>';
+    : '<div class="empty-state"><div class="empty-icon">◎</div>No objectives yet</div>';
 }
 
 function addObjective() {
-  const name = document.getElementById('new-obj-name').value.trim();
-  if (!name) return;
-  const pct = parseInt(document.getElementById('new-obj-pct').value) || 0;
+  const name = document.getElementById('new-obj-name').value.trim(); if(!name)return;
+  const pct = parseInt(document.getElementById('new-obj-pct').value)||0;
   const desc = document.getElementById('new-obj-desc').value.trim();
-  updateState(s => {
-    s.objectives = [...(s.objectives || []), { id: uid(), name, pct, desc }];
-  });
-  document.getElementById('new-obj-name').value = '';
-  document.getElementById('new-obj-desc').value = '';
-  document.getElementById('new-obj-pct').value = 0;
-  document.getElementById('new-obj-pct-val').textContent = '0%';
+  updateState(s=>{s.objectives=[...(s.objectives||[]),{id:uid(),name,pct,desc}];});
+  document.getElementById('new-obj-name').value=''; document.getElementById('new-obj-desc').value='';
+  document.getElementById('new-obj-pct').value=0; document.getElementById('new-obj-pct-val').textContent='0%';
 }
-
-function deleteObjective(id) {
-  updateState(s => { s.objectives = s.objectives.filter(o => o.id !== id); });
-}
-
+function deleteObjective(id) { updateState(s=>{s.objectives=s.objectives.filter(o=>o.id!==id);}); }
 function editObjectivePct(id) {
-  const obj = getState().objectives.find(o => o.id === id);
-  if (!obj) return;
-  const newPct = prompt(`Update progress for "${obj.name}" (0-100):`, obj.pct);
-  if (newPct === null) return;
-  const pct = Math.max(0, Math.min(100, parseInt(newPct) || 0));
-  updateState(s => {
-    const o = s.objectives.find(x => x.id === id);
-    if (o) o.pct = pct;
-  });
+  const obj=getState().objectives.find(o=>o.id===id); if(!obj)return;
+  const v=prompt(`Progress for "${obj.name}" (0-100):`,obj.pct); if(v===null)return;
+  const pct=Math.max(0,Math.min(100,parseInt(v)||0));
+  updateState(s=>{const o=s.objectives.find(x=>x.id===id);if(o)o.pct=pct;});
 }
 
-// ── Ingestion Console ─────────────────────────────────────────────
+// ── Ingestion ──
 function renderIngest() {
   const state = getState();
   const history = state.ingestionHistory || [];
-  const el = document.getElementById('ingest-history');
-  el.innerHTML = history.length
-    ? [...history].reverse().map(h => `
-        <div class="history-item">
-          <div>
-            <div class="history-filename">${esc(h.filename)}</div>
-            <div class="history-meta">${h.date} · ${h.party || 'unknown party'} · ${h.taskCount || 0} tasks extracted</div>
-          </div>
-          ${typeBadge(h.type)}
-        </div>`).join('')
+  document.getElementById('ingest-history').innerHTML = history.length
+    ? [...history].reverse().map(h=>`<div class="history-item"><div><div class="history-filename">${esc(h.filename)}</div><div class="history-meta">${h.date} · ${h.party||'unknown'} · ${h.taskCount||0} tasks</div></div>${typeBadge(h.type)}</div>`).join('')
     : '<div class="empty-state" style="padding:20px">No files processed yet</div>';
 }
 
-function setDropZoneState(state, message = '') {
-  const dz = document.getElementById('drop-zone');
-  const icon = document.getElementById('dz-icon');
-  const title = document.getElementById('dz-title');
-  const sub = document.getElementById('dz-sub');
-  const input = document.getElementById('file-input');
-
-  dz.className = '';
-  if (state === 'idle') {
-    icon.textContent = '📄';
-    title.textContent = 'Drop your meeting notes here';
-    sub.textContent = 'or click to browse';
-    input.disabled = false;
-  } else if (state === 'drag-over') {
-    dz.classList.add('drag-over');
-    icon.textContent = '📥';
-    title.textContent = 'Release to process';
-    sub.textContent = '';
-  } else if (state === 'processing') {
-    dz.classList.add('processing');
-    icon.textContent = '⚙️';
-    title.textContent = message || 'Processing...';
-    sub.textContent = 'Please wait';
-    input.disabled = true;
-  } else if (state === 'success') {
-    dz.classList.add('success');
-    icon.textContent = '✅';
-    title.textContent = 'Intelligence extracted!';
-    sub.textContent = 'Click to process another file';
-    input.disabled = false;
-  } else if (state === 'error') {
-    dz.classList.add('error');
-    icon.textContent = '⚠️';
-    title.textContent = 'Processing failed';
-    sub.textContent = 'Click to try again';
-    input.disabled = false;
-  }
+function setDropZoneState(state, message='') {
+  const dz=document.getElementById('drop-zone');
+  const icon=document.getElementById('dz-icon');
+  const title=document.getElementById('dz-title');
+  const sub=document.getElementById('dz-sub');
+  const input=document.getElementById('file-input');
+  dz.className='';
+  if(state==='idle'){icon.textContent='📄';title.textContent='Drop your meeting notes here';sub.textContent='or click to browse';input.disabled=false;}
+  else if(state==='drag-over'){dz.classList.add('drag-over');icon.textContent='📥';title.textContent='Release to process';sub.textContent='';}
+  else if(state==='processing'){dz.classList.add('processing');icon.textContent='⚙️';title.textContent=message||'Processing...';sub.textContent='Please wait';input.disabled=true;}
+  else if(state==='success'){dz.classList.add('success');icon.textContent='✅';title.textContent='Intelligence extracted!';sub.textContent='Click to process another file';input.disabled=false;}
+  else if(state==='error'){dz.classList.add('error');icon.textContent='⚠️';title.textContent='Processing failed';sub.textContent='Click to try again';input.disabled=false;}
 }
 
-function showStatus(type, message, showSpinner = false) {
-  const el = document.getElementById('process-status');
-  el.className = `show ${type}`;
-  el.innerHTML = showSpinner
-    ? `<div class="spinner"></div><span>${message}</span>`
-    : `<span>${message}</span>`;
+function showStatus(type, message, spinner=false) {
+  const el=document.getElementById('process-status');
+  el.className=`show ${type}`;
+  el.innerHTML=spinner?`<div class="spinner"></div><span>${message}</span>`:`<span>${message}</span>`;
 }
 
-function hideStatus() {
-  document.getElementById('process-status').className = '';
-}
-
-function handleDragOver(e) {
-  e.preventDefault();
-  setDropZoneState('drag-over');
-}
-
-function handleDragLeave(e) {
-  setDropZoneState('idle');
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  const file = e.dataTransfer.files[0];
-  if (file) processFile(file);
-  else setDropZoneState('idle');
-}
-
-function handleFileInput(e) {
-  const file = e.target.files[0];
-  if (file) processFile(file);
-  e.target.value = '';
-}
+function handleDragOver(e){e.preventDefault();setDropZoneState('drag-over');}
+function handleDragLeave(){setDropZoneState('idle');}
+function handleDrop(e){e.preventDefault();const f=e.dataTransfer.files[0];if(f)processFile(f);else setDropZoneState('idle');}
+function handleFileInput(e){const f=e.target.files[0];if(f)processFile(f);e.target.value='';}
 
 async function processFile(file) {
-  if (PROXY_URL === 'YOUR_RAILWAY_URL_HERE') {
-    setDropZoneState('error');
-    showStatus('error', '⚠️ Backend not configured — update PROXY_URL in index.html with your Railway URL (e.g. http://localhost:3001 for local dev)');
-    return;
-  }
-
-  const ext = file.name.split('.').pop().toLowerCase();
-  const allowed = ['txt', 'md', 'docx', 'pdf'];
-  if (!allowed.includes(ext)) {
-    setDropZoneState('error');
-    showStatus('error', `Unsupported file type .${ext} — use .txt, .md, .docx, or .pdf`);
-    return;
-  }
-
+  if(PROXY_URL==='YOUR_RAILWAY_URL_HERE'){setDropZoneState('error');showStatus('error','⚠️ Backend not configured — set PROXY_URL');return;}
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(!['txt','md','docx','pdf'].includes(ext)){setDropZoneState('error');showStatus('error',`Unsupported file type .${ext}`);return;}
   try {
-    setDropZoneState('processing', 'Reading file...');
-    showStatus('info', 'Reading file...', true);
+    setDropZoneState('processing','Reading file...');showStatus('info','Reading file...',true);
+    let text='';
+    if(ext==='txt'||ext==='md') text=await file.text();
+    else if(ext==='docx') text=await extractDocx(file);
+    else if(ext==='pdf') text=await extractPdf(file);
+    if(!text.trim()) throw new Error('File appears to be empty');
 
-    let text = '';
-    if (ext === 'txt' || ext === 'md') {
-      text = await file.text();
-    } else if (ext === 'docx') {
-      text = await extractDocx(file);
-    } else if (ext === 'pdf') {
-      text = await extractPdf(file);
-    }
+    setDropZoneState('processing','Calling AI...');showStatus('info','Calling AI intelligence engine...',true);
+    const res=await fetch(`${PROXY_URL}/api/process`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:file.name,content:text})});
+    if(!res.ok){const err=await res.json().catch(()=>({error:res.statusText}));throw new Error(err.error||`Server error ${res.status}`);}
+    const intel=await res.json();
 
-    if (!text.trim()) throw new Error('File appears to be empty or could not be read');
-
-    setDropZoneState('processing', 'Calling AI intelligence engine...');
-    showStatus('info', 'Calling AI intelligence engine...', true);
-
-    const response = await fetch(`${PROXY_URL}/api/process`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename: file.name, content: text }),
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({ error: response.statusText }));
-      throw new Error(err.error || `Server error ${response.status}`);
-    }
-
-    const intel = await response.json();
-
-    setDropZoneState('processing', 'Saving intelligence...');
-    showStatus('info', 'Saving to dashboard...', true);
-
-    const meetingId = uid();
-    const now = new Date().toISOString().slice(0, 10);
-
-    const meeting = {
-      id: meetingId,
-      party: intel.party || file.name,
-      type: intel.type || 'Advisory',
-      date: intel.date || now,
-      context: intel.context || '',
-      insights: intel.insights || [],
-      redFlags: intel.redFlags || [],
-      opportunities: intel.opportunities || [],
-      tasks: [],
-      rawNotes: text.slice(0, 500),
-    };
-
-    const newTasks = (intel.tasks || []).map(t => ({
-      id: uid(),
-      title: t.title,
-      priority: t.priority || 'medium',
-      done: false,
-      category: t.category || 'general',
-      source: intel.party || file.name,
-      meetingId,
-      date: intel.date || now,
-      notes: t.notes || '',
+    setDropZoneState('processing','Saving...');showStatus('info','Saving to dashboard...',true);
+    const meetingId=uid();
+    const now=new Date().toISOString().slice(0,10);
+    const meeting={id:meetingId,party:intel.party||file.name,type:intel.type||'Advisory',date:intel.date||now,context:intel.context||'',insights:intel.insights||[],redFlags:intel.redFlags||[],opportunities:intel.opportunities||[],tasks:[],rawNotes:text.slice(0,500)};
+    const newTasks=(intel.tasks||[]).map(t=>({
+      id:uid(),title:t.title,priority:t.priority||'medium',done:false,status:'todo',
+      owner:t.owner||'Rus',category:t.category||'general',
+      source:intel.party||file.name,meetingId,date:intel.date||now,notes:t.notes||''
     }));
-
-    updateState(s => {
-      s.meetings = [...(s.meetings || []), meeting];
-      s.tasks = [...(s.tasks || []), ...newTasks];
-      if (intel.signals) s.signals = [...(s.signals || []), ...intel.signals];
-      if (intel.opportunities) s.opportunities = [...(s.opportunities || []), ...intel.opportunities];
-      if (intel.redFlags) s.risks = [...(s.risks || []), ...intel.redFlags];
-      s.ingestionHistory = [...(s.ingestionHistory || []), {
-        filename: file.name,
-        date: now,
-        party: intel.party,
-        type: intel.type,
-        taskCount: newTasks.length,
-      }];
+    updateState(s=>{
+      s.meetings=[...(s.meetings||[]),meeting];
+      s.tasks=[...(s.tasks||[]),...newTasks];
+      if(intel.signals)s.signals=[...(s.signals||[]),...intel.signals];
+      if(intel.opportunities)s.opportunities=[...(s.opportunities||[]),...intel.opportunities];
+      if(intel.redFlags)s.risks=[...(s.risks||[]),...intel.redFlags];
+      s.ingestionHistory=[...(s.ingestionHistory||[]),{filename:file.name,date:now,party:intel.party,type:intel.type,taskCount:newTasks.length}];
     });
-
     setDropZoneState('success');
-    showStatus('success', `✅ Extracted ${newTasks.length} tasks from "${file.name}" — meeting added to intelligence bank`);
+    showStatus('success',`✅ Extracted ${newTasks.length} tasks from "${file.name}"`);
     renderIngest();
-
-    setTimeout(() => setDropZoneState('idle'), 3000);
-
-  } catch (err) {
-    console.error('Ingestion error:', err);
-    setDropZoneState('error');
-    showStatus('error', `❌ ${err.message}`);
+    setTimeout(()=>setDropZoneState('idle'),3000);
+  } catch(err){
+    console.error('Ingestion error:',err);
+    setDropZoneState('error');showStatus('error',`❌ ${err.message}`);
   }
 }
 
 async function extractDocx(file) {
-  if (typeof JSZip === 'undefined') throw new Error('JSZip not loaded — check CDN connection');
-  const arrayBuffer = await file.arrayBuffer();
-  const zip = await JSZip.loadAsync(arrayBuffer);
-  const wordDoc = zip.file('word/document.xml');
-  if (!wordDoc) throw new Error('Invalid .docx file — word/document.xml not found');
-  const xml = await wordDoc.async('string');
-  return xml
-    .replace(/<w:br[^>]*/g, '\n')
-    .replace(/<w:p[ >][^>]*>/g, '\n')
-    .replace(/<[^>]+>/g, '')
+  if(typeof JSZip==='undefined')throw new Error('JSZip not loaded');
+  const ab=await file.arrayBuffer();
+  const zip=await JSZip.loadAsync(ab);
+  const doc=zip.file('word/document.xml');
+  if(!doc)throw new Error('Invalid .docx file');
+  const xml=await doc.async('string');
+  return xml.replace(/<w:br[^>]*/g,'\n').replace(/<w:p[ >][^>]*>/g,'\n').replace(/<[^>]+>/g,'')
     .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+    .replace(/\n{3,}/g,'\n\n').trim();
 }
 
 async function extractPdf(file) {
-  if (typeof pdfjsLib === 'undefined') throw new Error('pdf.js not loaded — check CDN connection');
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  let text = '';
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    text += content.items.map(item => item.str).join(' ') + '\n';
-  }
+  if(typeof pdfjsLib==='undefined')throw new Error('pdf.js not loaded');
+  const ab=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+  let text='';
+  for(let i=1;i<=pdf.numPages;i++){const p=await pdf.getPage(i);const c=await p.getTextContent();text+=c.items.map(x=>x.str).join(' ')+'\n';}
   return text.trim();
 }
 
 function clearAllData() {
-  if (!confirm('This will permanently delete all meetings, tasks, objectives and intelligence. Are you sure?')) return;
+  if(!confirm('Permanently delete all meetings, tasks, objectives and intelligence?'))return;
   localStorage.removeItem(STORAGE_KEY);
-  window._state = JSON.parse(JSON.stringify(SEED));
+  window._state=JSON.parse(JSON.stringify(SEED));
   saveState(window._state);
+  updateOwnerDropdown();
+  updateSidebarBadges();
   renderCurrentSection();
-  showStatus('success', '✅ All data cleared — seed data reloaded');
+  showStatus('success','✅ All data cleared — seed data reloaded');
 }
 
-// ── Keyboard shortcuts ────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-  const shortcuts = { '1': 'dashboard', '2': 'actions', '3': 'meetings', '4': 'intel', '5': 'objectives', '6': 'ingest' };
-  if (shortcuts[e.key]) navigate(shortcuts[e.key]);
+// ── Keyboard shortcuts ──
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+  const map={'1':'dashboard','2':'actions','3':'teamtasks','4':'meetings','5':'intel','6':'objectives','7':'team','8':'ingest'};
+  if(map[e.key])navigate(map[e.key]);
 });
 
-// ── Boot ──────────────────────────────────────────────────────────
 init();
 </script>
 </body>
